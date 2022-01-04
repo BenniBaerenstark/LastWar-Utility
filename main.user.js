@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         LastWar Utilitys
 // @namespace    http://tampermonkey.net/
-// @version      0.1
+// @version      0.2
 // @description  Tool for LastWar
 // @author       Revan
 // @match        http*://*.last-war.de/main.php*
@@ -18,6 +18,7 @@
     var parent
 
     var BuildingNumber = window.BuildingNumber
+    var lvlBauzentrale = window.lvlBauzentrale
     var lvlRoheisen = window.lvlRoheisen
     var lvlKristall = window.lvlKristall
     var lvlFrubin = window.lvlFrubin
@@ -37,6 +38,31 @@
 
     let nIntervId
 
+    const HAUPTQUARTIER = 5
+    const BAUZENTRALE = 6
+    const ROHEISEN = 9
+    const KRISTALL = 10
+    const FRUBIN = 11
+    const ORIZIN = 12
+    const FUROZIN = 13
+    const GOLD = 1
+
+    const INDEX_BZ = 0
+    const INDEX_FE = 1
+    const INDEX_KR = 2
+    const INDEX_FR = 3
+    const INDEX_OR = 4
+    const INDEX_FU = 5
+    const INDEX_AU = 6
+    const INDEX_HQ = 7
+
+    const RES_FE = 0
+    const RES_KR = 1
+    const RES_FR = 2
+    const RES_OR = 3
+    const RES_FU = 4
+    const RES_AU = 5
+
     window.onclick = e => {
         if(e.target.innerText == "Neues Handelsangebot stellen"){
             neuerHandelClicked()
@@ -48,7 +74,7 @@
 
     function neuerHandelClicked(){
         if (!nIntervId) {
-            nIntervId = setInterval(checkPageLoaded, 200);
+            nIntervId = setInterval(checkPageLoaded, 400);
         }
     }
 
@@ -57,7 +83,6 @@
         parent = document.getElementById("tradeOfferComment").parentElement
         }
         catch (e) {
-            console.log("Page not loaded")
             return false
         }
         clearInterval(nIntervId);
@@ -88,14 +113,15 @@
             parent.appendChild(div)
             div.appendChild(document.createElement("p"))
             div.appendChild(select)
-            div.appendChild(generate_table(1))
+            div.appendChild(generate_table(0))
         return true
     }
 
     function generate_table(id) {
-        
+
         var tbl = document.createElement("table");
         var tblBody = document.createElement("tbody");
+        var currentRes = build[id][RES](id)
 
         for (var i = 0; i < 2; i++) {
             var row = document.createElement("tr");
@@ -149,9 +175,19 @@
                 if(j == 0 && i == 1){
                     cell = document.createElement("td");
                     cell.classList = "constructionName"
-                    cell.id = "buildName"
-                    cellText = document.createTextNode(build[id][name]);
+                    cell.id = "tab_buildName"
+                    cellText = document.createTextNode(build[id][STRING] + " (" + (build[id][LVL]) + ")");
                 }
+
+
+
+                if(j == 1 && i == 1){
+                    cell = document.createElement("td");
+                    cell.classList = "roheisenVariable"
+                    cell.id = "tab_res_fe"
+                    cellText = document.createTextNode(currentRes[RES_FE]);
+                }
+
                 cell.appendChild(cellText);
                 row.appendChild(cell);
             }
@@ -161,63 +197,105 @@
         return tbl
 }
 
-    function getBuildNames(){
-        var names = new Array();
-        for (var i = 0; i < build.length; i++) {
-            names[i] = build[i][name]
-        }
-        return names
-    }
-
     function updateTable(){
 
     }
 
-    function retry(fn, retriesLeft = 2, interval = 1000) {
-        return new Promise((resolve, reject) => {
-            fn()
-                .then(resolve)
-                .catch((error) => {
-        if (retriesLeft === 0) {
-            reject(error);
-            return;
+    function getBuildNames(){
+        var names = new Array();
+        var index = 0
+        for (var i = 0; i < build.length; i++) {
+            if (build[i] != null){
+                names[index] = build[i][STRING]
+                index++
+            }
         }
-
-                setTimeout(() => {
-                    console.log('retrying...')
-                    retry(fn, retriesLeft - 1, interval).then(resolve).catch(reject);
-        }, interval);
-      });
-  });
-}
-
-    function getPriceHTML(id){
-    if (id == 1) return "<tr id='roheisenmine'><td class='constructionName' id='roheisenmineTd'>Roheisen Mine ( "+lvlRoheisen+" )</td><td class='roheisenVariable wordBreak'>"+$.number( (Math.round(Math.pow(parseInt(lvlRoheisen)*100/25, 2)+100)), 0, ',', '.')+"</td><td class='kristallVariable wordBreak'>"+$.number( (Math.round(Math.pow(parseInt(lvlRoheisen)*64/25, 2)+64)), 0, ',', '.')+"</td><td class='frubinVariable wordBreak'>0</td><td class='orizinVariable wordBreak'>"+$.number( (Math.round(Math.pow(parseInt(lvlRoheisen)*30/25, 2)+30)), 0, ',', '.')+"</td><td class='frurozinVariable wordBreak'>0</td><td class='goldVariable wordBreak'>0</td><td class='wordBreak timeConstructionTd' id='roheisenmineTime'>" + getBuildingTime(9, lvlRoheisen, RoheisenMineBuildingTime) + "</td></tr>";
-	if (id == 2) return "<tr id='kristall'><td class='constructionName' id='kristallTd'>Kristall Förderungsanlage ( "+lvlKristall+" )</td><td class='roheisenVariable wordBreak'>"+$.number( (Math.round(Math.pow(parseInt(lvlKristall)*80/25, 2)+80)), 0, ',', '.')+"</td><td class='kristallVariable wordBreak'>"+$.number( (Math.round(Math.pow(parseInt(lvlKristall)*80/25, 2)+80)), 0, ',', '.')+"</td><td class='frubinVariable wordBreak'>0</td><td class='orizinVariable wordBreak'>0</td><td class='frurozinVariable wordBreak'>0</td><td class='goldVariable wordBreak'>0</td><td class='wordBreak timeConstructionTd' id='kristallTime'>" + getBuildingTime(10, lvlKristall, KristallBuildingTime) + "</td></tr>";
-	if (id == 3) return "<tr id='frubin'><td class='constructionName' id='frubinTd'>Frubin Sammler ( "+lvlFrubin+" )</td><td class='roheisenVariable wordBreak'>"+$.number( (Math.round(Math.pow(parseInt(lvlFrubin)*80/25, 2)+80)), 0, ',', '.')+"</td><td class='kristallVariable wordBreak'>"+$.number( (Math.round(Math.pow(parseInt(lvlFrubin)*64/25, 2)+64)), 0, ',', '.')+"</td><td class='frubinVariable wordBreak'>0</td><td class='orizinVariable wordBreak'>0</td><td class='frurozinVariable wordBreak'>0</td><td class='goldVariable wordBreak'>0</td><td class='wordBreak timeConstructionTd' id='frubinTime'>" + getBuildingTime(11, lvlFrubin, FrubinBuildingTime) + "</td></tr>";
-	if (id == 4) return "<tr id='orizin'><td class='constructionName' id='orizinTd'>Orizin Gewinnungsanlage ( "+lvlOrizin+" )</td><td class='roheisenVariable wordBreak'>"+$.number( (Math.round(Math.pow(parseInt(lvlOrizin)*80/25, 2)+80)), 0, ',', '.')+"</td><td class='kristallVariable wordBreak'>"+$.number( (Math.round(Math.pow(parseInt(lvlOrizin)*64/25, 2)+64)), 0, ',', '.')+"</td><td class='frubinVariable wordBreak'>0</td><td class='orizinVariable wordBreak'>0</td><td class='frurozinVariable wordBreak'>0</td><td class='goldVariable wordBreak'>0</td><td class='wordBreak timeConstructionTd' id='orizinTime'>" + getBuildingTime(12, lvlOrizin, OrizinBuildingTime) + "</td></tr>";
-	if (id == 5) return "<tr id='frurozin'><td class='constructionName' id='frurozinTd'>Frurozin Herstellung ( "+lvlFrurozin+" )</td><td class='roheisenVariable wordBreak'>"+$.number( (Math.round(Math.pow((parseInt(lvlFrurozin)+1)*75/25, 2)+70)), 0, ',', '.')+"</td><td class='kristallVariable wordBreak'>"+$.number( (Math.round(Math.pow((parseInt(lvlFrurozin)+1)*48/25, 2)+48)), 0, ',', '.')+"</td><td class='frubinVariable wordBreak'>"+$.number( (Math.round(Math.pow((parseInt(lvlFrurozin)+1)*60/25, 2)+60)), 0, ',', '.')+"</td><td class='orizinVariable wordBreak'>0</td><td class='frurozinVariable wordBreak'>0</td><td class='goldVariable wordBreak'>0</td><td class='wordBreak timeConstructionTd' id='frurozinTime'>" + getBuildingTime(13, lvlFrurozin, FrurozinBuildingTime) + "</td></tr>";
-    if (id == 6) return "<tr id='gold'><td class='constructionName' id='goldTd'>Gold Mine ( "+lvlGold+" )</td><td class='roheisenVariable wordBreak'>"+$.number( (Math.round(Math.pow((parseInt(lvlGold)+1)*200/25, 2)+200)), 0, ',', '.')+"</td><td class='kristallVariable wordBreak'>"+$.number( (Math.round(Math.pow((parseInt(lvlGold)+1)*125/25, 2)+125)), 0, ',', '.')+"</td><td class='frubinVariable wordBreak'>0</td><td class='orizinVariable wordBreak'>"+$.number( (Math.round(Math.pow((parseInt(lvlGold)+1)*140/25, 2)+140)), 0, ',', '.')+"</td><td class='frurozinVariable wordBreak'>0</td><td class='goldVariable wordBreak'>0</td><td class='wordBreak timeConstructionTd' id='goldTime'>" + getBuildingTime(1, lvlGold, GoldBuildingTime) + "</td></tr>";
-
+        return names
     }
 
+    function updateLvl(){
+        build[INDEX_BZ][LVL] = window.lvlBauzentrale
+        build[INDEX_FE][LVL] = window.lvlRoheisen
+        build[INDEX_KR][LVL] = window.lvlKristall
+        build[INDEX_FR][LVL] = window.lvlFrubin
+        build[INDEX_OR][LVL] = window.lvlOrizin
+        build[INDEX_FU][LVL] = window.lvlFrurozin
+        build[INDEX_AU][LVL] = window.lvlGold
+        build[INDEX_HQ][LVL] = window.lvlHauptquartier
+    }
+
+
+    "<tr id='roheisenmine'><td class='constructionName' id='roheisenmineTd'>Roheisen Mine ( "+lvlRoheisen+" )</td><td class='roheisenVariable wordBreak'>"+$.number( (Math.round(Math.pow(parseInt(lvlRoheisen)*100/25, 2)+100)), 0, ',', '.')+"</td><td class='kristallVariable wordBreak'>"+$.number( (Math.round(Math.pow(parseInt(lvlRoheisen)*64/25, 2)+64)), 0, ',', '.')+"</td><td class='frubinVariable wordBreak'>0</td><td class='orizinVariable wordBreak'>"+$.number( (Math.round(Math.pow(parseInt(lvlRoheisen)*30/25, 2)+30)), 0, ',', '.')+"</td><td class='frurozinVariable wordBreak'>0</td><td class='goldVariable wordBreak'>0</td><td class='wordBreak timeConstructionTd' id='roheisenmineTime'>" + getBuildingTime(9, lvlRoheisen, RoheisenMineBuildingTime) + "</td></tr>";
+	//"<tr id='kristall'><td class='constructionName' id='kristallTd'>Kristall Förderungsanlage ( "+lvlKristall+" )</td><td class='roheisenVariable wordBreak'>"+$.number( (Math.round(Math.pow(parseInt(lvlKristall)*80/25, 2)+80)), 0, ',', '.')+"</td><td class='kristallVariable wordBreak'>"+$.number( (Math.round(Math.pow(parseInt(lvlKristall)*80/25, 2)+80)), 0, ',', '.')+"</td><td class='frubinVariable wordBreak'>0</td><td class='orizinVariable wordBreak'>0</td><td class='frurozinVariable wordBreak'>0</td><td class='goldVariable wordBreak'>0</td><td class='wordBreak timeConstructionTd' id='kristallTime'>" + getBuildingTime(10, lvlKristall, KristallBuildingTime) + "</td></tr>";
+	//"<tr id='frubin'><td class='constructionName' id='frubinTd'>Frubin Sammler ( "+lvlFrubin+" )</td><td class='roheisenVariable wordBreak'>"+$.number( (Math.round(Math.pow(parseInt(lvlFrubin)*80/25, 2)+80)), 0, ',', '.')+"</td><td class='kristallVariable wordBreak'>"+$.number( (Math.round(Math.pow(parseInt(lvlFrubin)*64/25, 2)+64)), 0, ',', '.')+"</td><td class='frubinVariable wordBreak'>0</td><td class='orizinVariable wordBreak'>0</td><td class='frurozinVariable wordBreak'>0</td><td class='goldVariable wordBreak'>0</td><td class='wordBreak timeConstructionTd' id='frubinTime'>" + getBuildingTime(11, lvlFrubin, FrubinBuildingTime) + "</td></tr>";
+	//"<tr id='orizin'><td class='constructionName' id='orizinTd'>Orizin Gewinnungsanlage ( "+lvlOrizin+" )</td><td class='roheisenVariable wordBreak'>"+$.number( (Math.round(Math.pow(parseInt(lvlOrizin)*80/25, 2)+80)), 0, ',', '.')+"</td><td class='kristallVariable wordBreak'>"+$.number( (Math.round(Math.pow(parseInt(lvlOrizin)*64/25, 2)+64)), 0, ',', '.')+"</td><td class='frubinVariable wordBreak'>0</td><td class='orizinVariable wordBreak'>0</td><td class='frurozinVariable wordBreak'>0</td><td class='goldVariable wordBreak'>0</td><td class='wordBreak timeConstructionTd' id='orizinTime'>" + getBuildingTime(12, lvlOrizin, OrizinBuildingTime) + "</td></tr>";
+	//"<tr id='frurozin'><td class='constructionName' id='frurozinTd'>Frurozin Herstellung ( "+lvlFrurozin+" )</td><td class='roheisenVariable wordBreak'>"+$.number( (Math.round(Math.pow((parseInt(lvlFrurozin)+1)*75/25, 2)+70)), 0, ',', '.')+"</td><td class='kristallVariable wordBreak'>"+$.number( (Math.round(Math.pow((parseInt(lvlFrurozin)+1)*48/25, 2)+48)), 0, ',', '.')+"</td><td class='frubinVariable wordBreak'>"+$.number( (Math.round(Math.pow((parseInt(lvlFrurozin)+1)*60/25, 2)+60)), 0, ',', '.')+"</td><td class='orizinVariable wordBreak'>0</td><td class='frurozinVariable wordBreak'>0</td><td class='goldVariable wordBreak'>0</td><td class='wordBreak timeConstructionTd' id='frurozinTime'>" + getBuildingTime(13, lvlFrurozin, FrurozinBuildingTime) + "</td></tr>";
+    //"<tr id='gold'><td class='constructionName' id='goldTd'>Gold Mine ( "+lvlGold+" )</td><td class='roheisenVariable wordBreak'>"+$.number( (Math.round(Math.pow((parseInt(lvlGold)+1)*200/25, 2)+200)), 0, ',', '.')+"</td><td class='kristallVariable wordBreak'>"+$.number( (Math.round(Math.pow((parseInt(lvlGold)+1)*125/25, 2)+125)), 0, ',', '.')+"</td><td class='frubinVariable wordBreak'>0</td><td class='orizinVariable wordBreak'>"+$.number( (Math.round(Math.pow((parseInt(lvlGold)+1)*140/25, 2)+140)), 0, ',', '.')+"</td><td class='frurozinVariable wordBreak'>0</td><td class='goldVariable wordBreak'>0</td><td class='wordBreak timeConstructionTd' id='goldTime'>" + getBuildingTime(1, lvlGold, GoldBuildingTime) + "</td></tr>";
+
+
     var build = new Array()
-    const name = 0
+    const LW_ID = 0
+    const STRING = 1
+    const LVL = 2
+    const RES = 3
 
-    build[0] = new Array()
-    build[1] = new Array()
-    build[2] = new Array()
-    build[3] = new Array()
-    build[4] = new Array()
-    build[5] = new Array()
-    build[6] = new Array()
+    build[INDEX_BZ] = new Array()
+    build[INDEX_FE] = new Array()
+    build[INDEX_KR] = new Array()
+    build[INDEX_FR] = new Array()
+    build[INDEX_OR] = new Array()
+    build[INDEX_FU] = new Array()
+    build[INDEX_AU] = new Array()
+    build[INDEX_HQ] = new Array()
 
-    build[0][name] = "Roheisen Mine"
-    build[1][name] = "Kristall Förderungsanlage"
-    build[2][name] = "Frubin Sammler"
-    build[3][name] = "Orizin Gewinnungsanlage"
-    build[4][name] = "Frurozin Herstellung"
-    build[5][name] = "Gold Min"
-    build[6][name] = "Bauzentrale"
+    build[INDEX_BZ][LW_ID] = BAUZENTRALE
+    build[INDEX_FE][LW_ID] = ROHEISEN
+    build[INDEX_KR][LW_ID] = KRISTALL
+    build[INDEX_FR][LW_ID] = FRUBIN
+    build[INDEX_OR][LW_ID] = ORIZIN
+    build[INDEX_FU][LW_ID] = FUROZIN
+    build[INDEX_AU][LW_ID] = GOLD
+    build[INDEX_HQ][LW_ID] = HAUPTQUARTIER
+
+    build[INDEX_BZ][STRING] = "Bauzentrale"
+    build[INDEX_FE][STRING] = "Roheisen Mine"
+    build[INDEX_KR][STRING] = "Kristall Förderungsanlage"
+    build[INDEX_FR][STRING] = "Frubin Sammler"
+    build[INDEX_OR][STRING] = "Orizin Gewinnungsanlage"
+    build[INDEX_FU][STRING] = "Frurozin Herstellung"
+    build[INDEX_AU][STRING] = "Gold Mine"
+    build[INDEX_HQ][STRING] = "Hauptquartier"
+
+    build[INDEX_BZ][RES] = ress_BZ
+    build[INDEX_FE][RES] = null
+    build[INDEX_KR][RES] = null
+    build[INDEX_FR][RES] = null
+    build[INDEX_OR][RES] = null
+    build[INDEX_FU][RES] = null
+    build[INDEX_AU][RES] = null
+    build[INDEX_HQ][RES] = null
+
+    updateLvl()
+
+    function ress_BZ(lvl){
+        var res = new Array()
+        res[RES_FE] = (Math.round(Math.pow(parseInt(lvl)*100/25, 2)+100))
+        res[RES_KR] = 234
+        res[RES_FR] = 345
+        res[RES_OR] = 456
+        res[RES_FU] = 567
+        res[RES_AU] = 678
+        return res
+    }
+
+
+
+
+
+
+
+
+
+
 
 })();
