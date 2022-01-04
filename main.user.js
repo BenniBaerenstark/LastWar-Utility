@@ -1,14 +1,4 @@
-// ==UserScript==
-// @name         LastWar Utilitys
-// @namespace    http://tampermonkey.net/
-// @version      1.0.0
-// @description  Tool for LastWar
-// @author       Revan
-// @match        http*://*.last-war.de/main.php*
-// @match        http*://*.last-war.de/main-mobile.php*
-// @grant        none
-// @downloadURL  https://github.com/BenniBaerenstark/LastWar-Utility/raw/main/main.user.js
-// @updateURL    https://github.com/BenniBaerenstark/LastWar-Utility/raw/main/main.user.js// ==UserScript==
+==UserScript==
 // @name         LastWar Utilitys
 // @namespace    http://tampermonkey.net/
 // @version      1.0.1
@@ -18,7 +8,7 @@
 // @match        http*://*.last-war.de/main-mobile.php*
 // @grant        none
 // @downloadURL  https://github.com/BenniBaerenstark/-DG-Ship-Market/raw/main/main.user.js
-// @updateURL    https://github.com/BenniBaerenstark/-DG-Ship-Market/edit/main/main.user.js
+// @updateURL    https://github.com/BenniBaerenstark/-DG-Ship-Market/raw/main/main.user.js
 // @run-at      document-idle
 // ==/UserScript==
 
