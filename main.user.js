@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         LastWar Utilitys
 // @namespace    http://tampermonkey.net/
-// @version      1.0.1
+// @version      1.0.2
 // @description  Tool for LastWar
 // @author       Revan
 // @match        http*://*.last-war.de/main.php*
