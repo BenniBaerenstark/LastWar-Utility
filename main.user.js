@@ -7,8 +7,8 @@
 // @match        http*://*.last-war.de/main.php*
 // @match        http*://*.last-war.de/main-mobile.php*
 // @grant        none
-// @downloadURL  https://github.com/BenniBaerenstark/-DG-Ship-Market/raw/main/main.user.js
-// @updateURL    https://github.com/BenniBaerenstark/-DG-Ship-Market/raw/main/main.user.js
+// @downloadURL  https://github.com/BenniBaerenstark/LastWar-Utility/raw/main/main.user.js
+// @updateURL    https://github.com/BenniBaerenstark/LastWar-Utility/raw/main/main.user.js
 // @run-at      document-idle
 // ==/UserScript==
 
