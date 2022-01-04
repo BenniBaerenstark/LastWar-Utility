@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         LastWar Utilitys
 // @namespace    http://tampermonkey.net/
-// @version      0.2
+// @version      1.0.0
 // @description  Tool for LastWar
 // @author       Revan
 // @match        http*://*.last-war.de/main.php*
@@ -16,15 +16,9 @@
     'use strict';
     var select
     var parent
+    var input_lvl
 
     var BuildingNumber = window.BuildingNumber
-    var lvlBauzentrale = window.lvlBauzentrale
-    var lvlRoheisen = window.lvlRoheisen
-    var lvlKristall = window.lvlKristall
-    var lvlFrubin = window.lvlFrubin
-    var lvlOrizin = window.lvlOrizin
-    var lvlFrurozin = window.lvlFrurozin
-    var lvlGold = window.lvlGold
 
     var getBuildingTime = window.getBuildingTime
     var RoheisenMineBuildingTime = window.RoheisenMineBuildingTime
@@ -91,46 +85,77 @@
         return true
     }
 
+    function generateSelector(){
+        var values = getBuildNames();
+        select = document.createElement("select");
+        select.name = "buildSelect";
+        select.id = "buildSelect"
+        select.style.fontSize = "17px";
+        for (const val of values) {
+            var option = document.createElement("option");
+            option.value = val;
+            option.text = val.charAt(0).toUpperCase() + val.slice(1);
+            select.appendChild(option);
+        }
+        select.addEventListener ("change", function () {
+            updateTable1()
+        })
+    }
+
     function generatePage(){
 
         var div = document.createElement("div");
         div.id = "container"
 
-        var values = getBuildNames();
-            select = document.createElement("select");
-            select.name = "buildSelect";
-            select.id = "buildSelect"
-            for (const val of values) {
-                var option = document.createElement("option");
-                option.value = val;
-                option.text = val.charAt(0).toUpperCase() + val.slice(1);
-                select.appendChild(option);
-            }
-            select.addEventListener ("change", function () {
-                updateTable()
-            })
+        var btn = document.createElement("a");
+        btn.classList.add("formButtonNewMessage")
+        btn.innerHTML = "Fordern"
+        btn.setAttribute("style", "float: none");
+        btn.addEventListener("click", setTrade, false);
 
-            parent.appendChild(div)
-            div.appendChild(document.createElement("p"))
-            div.appendChild(select)
-            div.appendChild(generate_table(0))
-        return true
+        var btn2 = document.createElement("a");
+        btn2.classList.add("formButtonNewMessage")
+        btn2.innerHTML = "Saven"
+        btn2.setAttribute("style", "float: none");
+        btn2.addEventListener("click", setSave, false);
+
+        var btn_div = document.createElement("div");
+
+        parent.appendChild(div)
+        div.appendChild(document.createElement("p"))
+        generateSelector()
+
+        div.appendChild(generate_table(0))
+        div.appendChild(btn)
+        div.appendChild(btn2)
+
     }
 
     function generate_table(id) {
 
+        updateLvl()
+
         var tbl = document.createElement("table");
         var tblBody = document.createElement("tbody");
-        var currentRes = build[id][RES](id)
+        var currentRes = build[id][RES](build[id][LVL])
+
+        input_lvl = document.createElement("INPUT");
+        input_lvl.setAttribute("style", "width: 50px;");
+        input_lvl.type = "number"
+        input_lvl.id = "input-lvl"
+        input_lvl.value = build[id][LVL]+1
+        input_lvl.addEventListener ("change", function () {
+            updateTable2()
+        })
 
         for (var i = 0; i < 2; i++) {
             var row = document.createElement("tr");
             if (i == 0) row.classList = "rohstoffgebaude"
             if (i > 0) row.classList = ""
 
-            for (var j = 0; j < 8; j++) {
+            for (var j = 0; j < 9; j++) {
                 var cell = document.createElement("td");
-                var cellText = document.createTextNode("leer");
+                var cellText = document.createTextNode("NA");
                 if(j == 0 && i == 0){
                     cell = document.createElement("th");
                     cell.classList = "constructionName"
@@ -138,54 +163,92 @@
                 }
                 if(j == 1 && i == 0){
                     cell = document.createElement("th");
+                    cell.classList = "constructionName"
+                    cellText = document.createTextNode("Stufe");
+                }
+                if(j == 2 && i == 0){
+                    cell = document.createElement("th");
                     cell.classList = "roheisenVariable"
                     cellText = document.createTextNode("Roheisen");
                 }
-                if(j == 2 && i == 0){
+                if(j == 3 && i == 0){
                     cell = document.createElement("th");
                     cell.classList = "kristallVariable"
                     cellText = document.createTextNode("Kristall");
                 }
-                if(j == 3 && i == 0){
+                if(j == 4 && i == 0){
                     cell = document.createElement("th");
                     cell.classList = "frubinVariable"
                     cellText = document.createTextNode("Frubin");
                 }
-                if(j == 4 && i == 0){
+                if(j == 5 && i == 0){
                     cell = document.createElement("th");
                     cell.classList = "orizinVariable"
                     cellText = document.createTextNode("Orizin");
                 }
-                if(j == 5 && i == 0){
+                if(j == 6 && i == 0){
                     cell = document.createElement("th");
                     cell.classList = "frurozinVariable"
                     cellText = document.createTextNode("Frurozin");
                 }
-                if(j == 6 && i == 0){
+                if(j == 7 && i == 0){
                     cell = document.createElement("th");
                     cell.classList = "goldVariable"
                     cellText = document.createTextNode("Gold");
                 }
-                if(j == 7 && i == 0){
+                if(j == 8 && i == 0){
                     cell = document.createElement("th");
                     cell.classList = ""
                     cellText = document.createTextNode("Dauer");
                 }
-
                 if(j == 0 && i == 1){
                     cell = document.createElement("td");
-                    cell.classList = "constructionName"
+                    cell.appendChild(select)
+                   // cell.classList = "constructionName"
                     cell.id = "tab_buildName"
-                    cellText = document.createTextNode(build[id][STRING] + " (" + (build[id][LVL]) + ")");
+                    cellText = document.createTextNode("");
+                }
+                if(j == 1 && i == 1){
+                    cell = document.createElement("td");
+                    cell.appendChild(input_lvl)
+                    cellText = document.createTextNode("");
                 }
 
-
-
-                if(j == 1 && i == 1){
+                if(j == 2 && i == 1){
                     cell = document.createElement("td");
                     cell.classList = "roheisenVariable"
                     cell.id = "tab_res_fe"
-                    cellText = document.createTextNode(currentRes[RES_FE]);
+                    cellText = document.createTextNode($.number( currentRes[RES_FE], 0, ',', '.'));
+                }
+                if(j == 3 && i == 1){
+                    cell = document.createElement("td");
+                    cell.classList = "kristallVariable"
+                    cell.id = "tab_res_kr"
+                    cellText = document.createTextNode($.number( currentRes[RES_KR], 0, ',', '.'));
+                }
+                if(j == 4 && i == 1){
+                    cell = document.createElement("td");
+                    cell.classList = "frubinVariable"
+                    cell.id = "tab_res_fr"
+                    cellText = document.createTextNode($.number( currentRes[RES_FR], 0, ',', '.'));
+                }
+                if(j == 5 && i == 1){
+                    cell = document.createElement("td");
+                    cell.classList = "orizinVariable"
+                    cell.id = "tab_res_or"
+                    cellText = document.createTextNode($.number( currentRes[RES_OR], 0, ',', '.'));
+                }
+                if(j == 6 && i == 1){
+                    cell = document.createElement("td");
+                    cell.classList = "frurozinVariable"
+                    cell.id = "tab_res_fu"
+                    cellText = document.createTextNode($.number( currentRes[RES_FU], 0, ',', '.'));
+                }
+                if(j == 7 && i == 1){
+                    cell = document.createElement("td");
+                    cell.classList = "goldVariable"
+                    cell.id = "tab_res_au"
+                    cellText = document.createTextNode($.number( currentRes[RES_AU], 0, ',', '.'));
                 }
 
                 cell.appendChild(cellText);
@@ -197,10 +260,70 @@
         return tbl
 }
 
-    function updateTable(){
-
+    function updateTable1(){
+        console.log("select changed")
+        updateLvl()
+        var id = select.selectedIndex
+        var currentRes = build[id][RES](build[id][LVL])
+        document.getElementById("input-lvl").value = build[id][LVL]+1
+        document.getElementById("tab_res_fe").innerText = currentRes[RES_FE]
+        document.getElementById("tab_res_kr").innerText = currentRes[RES_KR]
+        document.getElementById("tab_res_fr").innerText = currentRes[RES_FR]
+        document.getElementById("tab_res_or").innerText = currentRes[RES_OR]
+        document.getElementById("tab_res_fu").innerText = currentRes[RES_FU]
+        document.getElementById("tab_res_au").innerText = currentRes[RES_AU]
     }
 
+    function updateTable2(){
+        console.log("input changed")
+        updateLvl()
+        var id = select.selectedIndex
+        var currentRes = build[id][RES](document.getElementById("input-lvl").value)
+        document.getElementById("tab_res_fe").innerText = currentRes[RES_FE]
+        document.getElementById("tab_res_kr").innerText = currentRes[RES_KR]
+        document.getElementById("tab_res_fr").innerText = currentRes[RES_FR]
+        document.getElementById("tab_res_or").innerText = currentRes[RES_OR]
+        document.getElementById("tab_res_fu").innerText = currentRes[RES_FU]
+        document.getElementById("tab_res_au").innerText = currentRes[RES_AU]
+    }
+
+    function setTrade(){
+        var id = select.selectedIndex
+        var currentRes = build[id][RES](document.getElementById("input-lvl").value)
+        document.getElementById("his_eisen").value = currentRes[RES_FE]
+        document.getElementById("his_kristall").value = currentRes[RES_KR]
+        document.getElementById("his_frubin").value = currentRes[RES_FR]
+        document.getElementById("his_orizin").value = currentRes[RES_OR]
+        document.getElementById("his_frurozin").value = currentRes[RES_FU]
+        document.getElementById("his_gold").value = currentRes[RES_AU]
+        document.getElementById("my_eisen").value = 1
+        document.getElementById("my_kristall").value = 0
+        document.getElementById("my_frubin").value = 0
+        document.getElementById("my_orizin").value = 0
+        document.getElementById("my_frurozin").value = 0
+        document.getElementById("my_gold").value = 0
+        document.getElementById("tradeOfferComment").value = ""
+    }
+
+    function setSave(){
+        var id = select.selectedIndex
+        var currentRes = build[id][RES](document.getElementById("input-lvl").value-1)
+        document.getElementById("my_eisen").value = currentRes[RES_FE]
+        document.getElementById("my_kristall").value = currentRes[RES_KR]
+        document.getElementById("my_frubin").value = currentRes[RES_FR]
+        document.getElementById("my_orizin").value = currentRes[RES_OR]
+        document.getElementById("my_frurozin").value = currentRes[RES_FU]
+        document.getElementById("my_gold").value = currentRes[RES_AU]
+        document.getElementById("his_eisen").value = 0
+        document.getElementById("his_kristall").value = 0
+        document.getElementById("his_frubin").value = 0
+        document.getElementById("his_orizin").value = 0
+        document.getElementById("his_frurozin").value = 0
+        document.getElementById("his_gold").value = 99999999
+        document.getElementById("tradeOfferComment").value = "###LWM::SAVE###"
+
+        document.getElementById("lwm-own-coords").selectedIndex = 1
+    }
     function getBuildNames(){
         var names = new Array();
         var index = 0
@@ -223,15 +346,6 @@
         build[INDEX_AU][LVL] = window.lvlGold
         build[INDEX_HQ][LVL] = window.lvlHauptquartier
     }
-
-
-    "<tr id='roheisenmine'><td class='constructionName' id='roheisenmineTd'>Roheisen Mine ( "+lvlRoheisen+" )</td><td class='roheisenVariable wordBreak'>"+$.number( (Math.round(Math.pow(parseInt(lvlRoheisen)*100/25, 2)+100)), 0, ',', '.')+"</td><td class='kristallVariable wordBreak'>"+$.number( (Math.round(Math.pow(parseInt(lvlRoheisen)*64/25, 2)+64)), 0, ',', '.')+"</td><td class='frubinVariable wordBreak'>0</td><td class='orizinVariable wordBreak'>"+$.number( (Math.round(Math.pow(parseInt(lvlRoheisen)*30/25, 2)+30)), 0, ',', '.')+"</td><td class='frurozinVariable wordBreak'>0</td><td class='goldVariable wordBreak'>0</td><td class='wordBreak timeConstructionTd' id='roheisenmineTime'>" + getBuildingTime(9, lvlRoheisen, RoheisenMineBuildingTime) + "</td></tr>";
-	//"<tr id='kristall'><td class='constructionName' id='kristallTd'>Kristall Förderungsanlage ( "+lvlKristall+" )</td><td class='roheisenVariable wordBreak'>"+$.number( (Math.round(Math.pow(parseInt(lvlKristall)*80/25, 2)+80)), 0, ',', '.')+"</td><td class='kristallVariable wordBreak'>"+$.number( (Math.round(Math.pow(parseInt(lvlKristall)*80/25, 2)+80)), 0, ',', '.')+"</td><td class='frubinVariable wordBreak'>0</td><td class='orizinVariable wordBreak'>0</td><td class='frurozinVariable wordBreak'>0</td><td class='goldVariable wordBreak'>0</td><td class='wordBreak timeConstructionTd' id='kristallTime'>" + getBuildingTime(10, lvlKristall, KristallBuildingTime) + "</td></tr>";
-	//"<tr id='frubin'><td class='constructionName' id='frubinTd'>Frubin Sammler ( "+lvlFrubin+" )</td><td class='roheisenVariable wordBreak'>"+$.number( (Math.round(Math.pow(parseInt(lvlFrubin)*80/25, 2)+80)), 0, ',', '.')+"</td><td class='kristallVariable wordBreak'>"+$.number( (Math.round(Math.pow(parseInt(lvlFrubin)*64/25, 2)+64)), 0, ',', '.')+"</td><td class='frubinVariable wordBreak'>0</td><td class='orizinVariable wordBreak'>0</td><td class='frurozinVariable wordBreak'>0</td><td class='goldVariable wordBreak'>0</td><td class='wordBreak timeConstructionTd' id='frubinTime'>" + getBuildingTime(11, lvlFrubin, FrubinBuildingTime) + "</td></tr>";
-	//"<tr id='orizin'><td class='constructionName' id='orizinTd'>Orizin Gewinnungsanlage ( "+lvlOrizin+" )</td><td class='roheisenVariable wordBreak'>"+$.number( (Math.round(Math.pow(parseInt(lvlOrizin)*80/25, 2)+80)), 0, ',', '.')+"</td><td class='kristallVariable wordBreak'>"+$.number( (Math.round(Math.pow(parseInt(lvlOrizin)*64/25, 2)+64)), 0, ',', '.')+"</td><td class='frubinVariable wordBreak'>0</td><td class='orizinVariable wordBreak'>0</td><td class='frurozinVariable wordBreak'>0</td><td class='goldVariable wordBreak'>0</td><td class='wordBreak timeConstructionTd' id='orizinTime'>" + getBuildingTime(12, lvlOrizin, OrizinBuildingTime) + "</td></tr>";
-	//"<tr id='frurozin'><td class='constructionName' id='frurozinTd'>Frurozin Herstellung ( "+lvlFrurozin+" )</td><td class='roheisenVariable wordBreak'>"+$.number( (Math.round(Math.pow((parseInt(lvlFrurozin)+1)*75/25, 2)+70)), 0, ',', '.')+"</td><td class='kristallVariable wordBreak'>"+$.number( (Math.round(Math.pow((parseInt(lvlFrurozin)+1)*48/25, 2)+48)), 0, ',', '.')+"</td><td class='frubinVariable wordBreak'>"+$.number( (Math.round(Math.pow((parseInt(lvlFrurozin)+1)*60/25, 2)+60)), 0, ',', '.')+"</td><td class='orizinVariable wordBreak'>0</td><td class='frurozinVariable wordBreak'>0</td><td class='goldVariable wordBreak'>0</td><td class='wordBreak timeConstructionTd' id='frurozinTime'>" + getBuildingTime(13, lvlFrurozin, FrurozinBuildingTime) + "</td></tr>";
-    //"<tr id='gold'><td class='constructionName' id='goldTd'>Gold Mine ( "+lvlGold+" )</td><td class='roheisenVariable wordBreak'>"+$.number( (Math.round(Math.pow((parseInt(lvlGold)+1)*200/25, 2)+200)), 0, ',', '.')+"</td><td class='kristallVariable wordBreak'>"+$.number( (Math.round(Math.pow((parseInt(lvlGold)+1)*125/25, 2)+125)), 0, ',', '.')+"</td><td class='frubinVariable wordBreak'>0</td><td class='orizinVariable wordBreak'>"+$.number( (Math.round(Math.pow((parseInt(lvlGold)+1)*140/25, 2)+140)), 0, ',', '.')+"</td><td class='frurozinVariable wordBreak'>0</td><td class='goldVariable wordBreak'>0</td><td class='wordBreak timeConstructionTd' id='goldTime'>" + getBuildingTime(1, lvlGold, GoldBuildingTime) + "</td></tr>";
-
 
     var build = new Array()
     const LW_ID = 0
@@ -267,24 +381,101 @@
     build[INDEX_HQ][STRING] = "Hauptquartier"
 
     build[INDEX_BZ][RES] = ress_BZ
-    build[INDEX_FE][RES] = null
-    build[INDEX_KR][RES] = null
-    build[INDEX_FR][RES] = null
-    build[INDEX_OR][RES] = null
-    build[INDEX_FU][RES] = null
-    build[INDEX_AU][RES] = null
-    build[INDEX_HQ][RES] = null
+    build[INDEX_FE][RES] = ress_FE
+    build[INDEX_KR][RES] = ress_KR
+    build[INDEX_FR][RES] = ress_FR
+    build[INDEX_OR][RES] = ress_OR
+    build[INDEX_FU][RES] = ress_FU
+    build[INDEX_AU][RES] = ress_AU
+    build[INDEX_HQ][RES] = ress_HQ
 
     updateLvl()
 
     function ress_BZ(lvl){
         var res = new Array()
+        res[RES_FE] = (240*(parseInt(lvl)+1)+60)
+        res[RES_KR] = (120*(parseInt(lvl)+1)+30)
+        res[RES_FR] = 0
+        res[RES_OR] = 0
+        res[RES_FU] = 0
+        res[RES_AU] = 0
+        return res
+    }
+
+    function ress_FE(lvl){
+        var res = new Array()
         res[RES_FE] = (Math.round(Math.pow(parseInt(lvl)*100/25, 2)+100))
-        res[RES_KR] = 234
-        res[RES_FR] = 345
-        res[RES_OR] = 456
-        res[RES_FU] = 567
-        res[RES_AU] = 678
+        res[RES_KR] = (Math.round(Math.pow(parseInt(lvl)*64/25, 2)+64))
+        res[RES_FR] = 0
+        res[RES_OR] = (Math.round(Math.pow(parseInt(lvl)*30/25, 2)+30))
+        res[RES_FU] = 0
+        res[RES_AU] = 0
+        return res
+    }
+
+     function ress_KR(lvl){
+        var res = new Array()
+        res[RES_FE] = (Math.round(Math.pow(parseInt(lvl)*80/25, 2)+80))
+        res[RES_KR] = (Math.round(Math.pow(parseInt(lvl)*80/25, 2)+80))
+        res[RES_FR] = 0
+        res[RES_OR] = 0
+        res[RES_FU] = 0
+        res[RES_AU] = 0
+        return res
+    }
+
+    function ress_FR(lvl){
+        var res = new Array()
+        res[RES_FE] = (Math.round(Math.pow(parseInt(lvl)*80/25, 2)+80))
+        res[RES_KR] = (Math.round(Math.pow(parseInt(lvl)*64/25, 2)+64))
+        res[RES_FR] = 0
+        res[RES_OR] = 0
+        res[RES_FU] = 0
+        res[RES_AU] = 0
+        return res
+    }
+
+    function ress_OR(lvl){
+        var res = new Array()
+        res[RES_FE] = (Math.round(Math.pow(parseInt(lvl)*80/25, 2)+80))
+        res[RES_KR] = (Math.round(Math.pow(parseInt(lvl)*64/25, 2)+64))
+        res[RES_FR] = 0
+        res[RES_OR] = 0
+        res[RES_FU] = 0
+        res[RES_AU] = 0
+        return res
+    }
+
+    function ress_FU(lvl){
+        var res = new Array()
+        res[RES_FE] = (Math.round(Math.pow((parseInt(lvl)+1)*75/25, 2)+70))
+        res[RES_KR] = (Math.round(Math.pow((parseInt(lvl)+1)*48/25, 2)+48))
+        res[RES_FR] = (Math.round(Math.pow((parseInt(lvl)+1)*60/25, 2)+60))
+        res[RES_OR] = 0
+        res[RES_FU] = 0
+        res[RES_AU] = 0
+        return res
+    }
+
+    function ress_AU(lvl){
+        var res = new Array()
+        res[RES_FE] = (Math.round(Math.pow((parseInt(lvl)+1)*200/25, 2)+200))
+        res[RES_KR] = (Math.round(Math.pow((parseInt(lvl)+1)*125/25, 2)+125))
+        res[RES_FR] = 0
+        res[RES_OR] = (Math.round(Math.pow((parseInt(lvl)+1)*140/25, 2)+140))
+        res[RES_FU] = 0
+        res[RES_AU] = 0
+        return res
+    }
+
+    function ress_HQ(lvl){
+        var res = new Array()
+        res[RES_FE] = (320*(parseInt(lvl)+1)+80)
+        res[RES_KR] = (120*(parseInt(lvl)+1)+30)
+        res[RES_FR] = 0
+        res[RES_OR] = 0
+        res[RES_FU] = 0
+        res[RES_AU] = 0
         return res
     }
 
