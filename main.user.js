@@ -1,4 +1,4 @@
-==UserScript==
+// ==UserScript==
 // @name         LastWar Utilitys
 // @namespace    http://tampermonkey.net/
 // @version      1.0.1
