@@ -1,6 +1,5 @@
-
 // ==UserScript==
-// @name         -DG- Management
+// @name         LastWar Utilitys
 // @namespace    http://tampermonkey.net/
 // @version      0.1
 // @description  Tool for LastWar
@@ -10,11 +9,13 @@
 // @grant        none
 // @downloadURL  https://github.com/BenniBaerenstark/-DG-Ship-Market/raw/main/main.user.js
 // @updateURL    https://github.com/BenniBaerenstark/-DG-Ship-Market/edit/main/main.user.js
+// @run-at      document-idle
 // ==/UserScript==
 
 (function() {
     'use strict';
     var select
+    var parent
 
     var BuildingNumber = window.BuildingNumber
     var lvlRoheisen = window.lvlRoheisen
@@ -34,6 +35,8 @@
 
     var $ = window.$
 
+    let nIntervId
+
     window.onclick = e => {
         if(e.target.innerText == "Neues Handelsangebot stellen"){
             neuerHandelClicked()
@@ -44,21 +47,34 @@
     }
 
     function neuerHandelClicked(){
-        setTimeout(generate_table,500)
+        if (!nIntervId) {
+            nIntervId = setInterval(checkPageLoaded, 200);
+        }
     }
 
-    function generate_table() {
+    function checkPageLoaded(){
+        try {
+        parent = document.getElementById("tradeOfferComment").parentElement
+        }
+        catch (e) {
+            console.log("Page not loaded")
+            return false
+        }
+        clearInterval(nIntervId);
+        nIntervId = null;
+        generatePage()
+        return true
+    }
 
-        var parent_length = document.getElementsByClassName("formButtonNewMessage").length
-        var parent = document.getElementsByClassName("formButtonNewMessage")[parent_length-1].parentElement
+    function generatePage(){
 
         var div = document.createElement("div");
         div.id = "container"
 
         var values = getBuildNames();
             select = document.createElement("select");
-            select.name = "shipSelect";
-            select.id = "shipSelect"
+            select.name = "buildSelect";
+            select.id = "buildSelect"
             for (const val of values) {
                 var option = document.createElement("option");
                 option.value = val;
@@ -69,37 +85,80 @@
                 updateTable()
             })
 
-        // creates a <table> element and a <tbody> element
+            parent.appendChild(div)
+            div.appendChild(document.createElement("p"))
+            div.appendChild(select)
+            div.appendChild(generate_table(1))
+        return true
+    }
+
+    function generate_table(id) {
+        
         var tbl = document.createElement("table");
         var tblBody = document.createElement("tbody");
 
-        // creating all cells
         for (var i = 0; i < 2; i++) {
-            // creates a table row
             var row = document.createElement("tr");
+            if (i == 0) row.classList = "rohstoffgebaude"
+            if (i > 0) row.classList = ""
 
-            for (var j = 0; j < 2; j++) {
-                // Create a <td> element and a text node, make the text
-                // node the contents of the <td>, and put the <td> at
-                // the end of the table row
+            for (var j = 0; j < 8; j++) {
                 var cell = document.createElement("td");
-                var cellText = document.createTextNode("cell in row "+i+", column "+j);
+                var cellText = document.createTextNode("leer");
+                if(j == 0 && i == 0){
+                    cell = document.createElement("th");
+                    cell.classList = "constructionName"
+                    cellText = document.createTextNode("Gebäude");
+                }
+                if(j == 1 && i == 0){
+                    cell = document.createElement("th");
+                    cell.classList = "roheisenVariable"
+                    cellText = document.createTextNode("Roheisen");
+                }
+                if(j == 2 && i == 0){
+                    cell = document.createElement("th");
+                    cell.classList = "kristallVariable"
+                    cellText = document.createTextNode("Kristall");
+                }
+                if(j == 3 && i == 0){
+                    cell = document.createElement("th");
+                    cell.classList = "frubinVariable"
+                    cellText = document.createTextNode("Frubin");
+                }
+                if(j == 4 && i == 0){
+                    cell = document.createElement("th");
+                    cell.classList = "orizinVariable"
+                    cellText = document.createTextNode("Orizin");
+                }
+                if(j == 5 && i == 0){
+                    cell = document.createElement("th");
+                    cell.classList = "frurozinVariable"
+                    cellText = document.createTextNode("Frurozin");
+                }
+                if(j == 6 && i == 0){
+                    cell = document.createElement("th");
+                    cell.classList = "goldVariable"
+                    cellText = document.createTextNode("Gold");
+                }
+                if(j == 7 && i == 0){
+                    cell = document.createElement("th");
+                    cell.classList = ""
+                    cellText = document.createTextNode("Dauer");
+                }
+
+                if(j == 0 && i == 1){
+                    cell = document.createElement("td");
+                    cell.classList = "constructionName"
+                    cell.id = "buildName"
+                    cellText = document.createTextNode(build[id][name]);
+                }
                 cell.appendChild(cellText);
                 row.appendChild(cell);
             }
-
-            // add the row to the end of the table body
             tblBody.appendChild(row);
         }
-
-        // put the <tbody> in the <table>
         tbl.appendChild(tblBody);
-        // appends <table> into <body>
-        parent.appendChild(div)
-        div.appendChild(select)
-        div.appendChild(tbl);
-        // sets the border attribute of tbl to 2;
-        tbl.setAttribute("border", "2");
+        return tbl
 }
 
     function getBuildNames(){
@@ -114,6 +173,23 @@
 
     }
 
+    function retry(fn, retriesLeft = 2, interval = 1000) {
+        return new Promise((resolve, reject) => {
+            fn()
+                .then(resolve)
+                .catch((error) => {
+        if (retriesLeft === 0) {
+            reject(error);
+            return;
+        }
+
+                setTimeout(() => {
+                    console.log('retrying...')
+                    retry(fn, retriesLeft - 1, interval).then(resolve).catch(reject);
+        }, interval);
+      });
+  });
+}
 
     function getPriceHTML(id){
     if (id == 1) return "<tr id='roheisenmine'><td class='constructionName' id='roheisenmineTd'>Roheisen Mine ( "+lvlRoheisen+" )</td><td class='roheisenVariable wordBreak'>"+$.number( (Math.round(Math.pow(parseInt(lvlRoheisen)*100/25, 2)+100)), 0, ',', '.')+"</td><td class='kristallVariable wordBreak'>"+$.number( (Math.round(Math.pow(parseInt(lvlRoheisen)*64/25, 2)+64)), 0, ',', '.')+"</td><td class='frubinVariable wordBreak'>0</td><td class='orizinVariable wordBreak'>"+$.number( (Math.round(Math.pow(parseInt(lvlRoheisen)*30/25, 2)+30)), 0, ',', '.')+"</td><td class='frurozinVariable wordBreak'>0</td><td class='goldVariable wordBreak'>0</td><td class='wordBreak timeConstructionTd' id='roheisenmineTime'>" + getBuildingTime(9, lvlRoheisen, RoheisenMineBuildingTime) + "</td></tr>";
@@ -124,7 +200,6 @@
     if (id == 6) return "<tr id='gold'><td class='constructionName' id='goldTd'>Gold Mine ( "+lvlGold+" )</td><td class='roheisenVariable wordBreak'>"+$.number( (Math.round(Math.pow((parseInt(lvlGold)+1)*200/25, 2)+200)), 0, ',', '.')+"</td><td class='kristallVariable wordBreak'>"+$.number( (Math.round(Math.pow((parseInt(lvlGold)+1)*125/25, 2)+125)), 0, ',', '.')+"</td><td class='frubinVariable wordBreak'>0</td><td class='orizinVariable wordBreak'>"+$.number( (Math.round(Math.pow((parseInt(lvlGold)+1)*140/25, 2)+140)), 0, ',', '.')+"</td><td class='frurozinVariable wordBreak'>0</td><td class='goldVariable wordBreak'>0</td><td class='wordBreak timeConstructionTd' id='goldTime'>" + getBuildingTime(1, lvlGold, GoldBuildingTime) + "</td></tr>";
 
     }
-
 
     var build = new Array()
     const name = 0
