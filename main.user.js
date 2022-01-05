@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         LastWar Utilitys
 // @namespace    http://tampermonkey.net/
-// @version      1.1.0
+// @version      1.1.2
 // @description  Tool for LastWar
 // @author       Revan
 // @match        http*://*.last-war.de/main.php*
@@ -68,7 +68,7 @@
 
     function neuerHandelClicked(){
         if (!nIntervId) {
-            nIntervId = setInterval(checkPageLoaded, 500);
+            nIntervId = setInterval(checkPageLoaded, 700);
         }
     }
 
@@ -90,7 +90,8 @@
         select = document.createElement("select");
         select.name = "buildSelect";
         select.id = "buildSelect"
-        select.style.fontSize = "17px";
+        if (window.innerWidth > 600) select.style.fontSize = "17px";
+        else select.style.fontSize = "12px";
         for (const val of values) {
             var option = document.createElement("option");
             option.value = val;
@@ -130,14 +131,15 @@
         div.appendChild(document.createElement("p"))
         generateSelector()
 
-        div.appendChild(generate_table(0))
+        if (window.innerWidth > 600) div.appendChild(generate_tableWide(0))
+        else div.appendChild(generate_tableNarrow(0))
         div.appendChild(btn3)
         div.appendChild(btn)
         div.appendChild(btn2)
 
     }
 
-    function generate_table(id) {
+    function generate_tableWide(id) {
 
         updateLvl()
 
@@ -265,6 +267,143 @@
         }
         tbl.appendChild(tblBody);
         return tbl
+    }
+
+    function generate_tableNarrow(id) {
+
+        updateLvl()
+
+        var tbl1 = document.createElement("table");
+        var tbl2 = document.createElement("table");
+        var tbl1Body = document.createElement("tbody");
+        var tbl2Body = document.createElement("tbody");
+        var div = document.createElement("div");
+
+        input_lvl = document.createElement("INPUT");
+        input_lvl.setAttribute("style", "width: 50px;");
+        input_lvl.type = "number"
+        input_lvl.id = "input-lvl"
+        input_lvl.value = checkLvl(id)+1
+        input_lvl.addEventListener ("change", function () {
+            updateTable2()
+        })
+
+        var currentRes = build[id][RES](input_lvl.value-1)
+
+        for (var i = 0; i < 4; i++) {
+            var row = document.createElement("tr");
+            if (i == 0) row.classList = "rohstoffgebaude"
+            if (i > 0) row.classList = ""
+
+            for (var j = 0; j < 7; j++) {
+                var cell = null
+                var cellText = null
+                if(j == 0 && i == 0){
+                    cell = document.createElement("th");
+                    cell.classList = "constructionName"
+                    cellText = document.createTextNode("Gebäude");
+                }
+                if(j == 1 && i == 0){
+                    cell = document.createElement("th");
+                    cell.classList = "constructionName"
+                    cellText = document.createTextNode("Stufe");
+                }
+                if(j == 0 && i == 3){
+                    cell = document.createElement("th");
+                    cell.classList = "roheisenVariable"
+                    cellText = document.createTextNode("Roheisen");
+                }
+                if(j == 1 && i == 2){
+                    cell = document.createElement("th");
+                    cell.classList = "kristallVariable"
+                    cellText = document.createTextNode("Kristall");
+                }
+                if(j == 2 && i == 2){
+                    cell = document.createElement("th");
+                    cell.classList = "frubinVariable"
+                    cellText = document.createTextNode("Frubin");
+                }
+                if(j == 3 && i == 2){
+                    cell = document.createElement("th");
+                    cell.classList = "orizinVariable"
+                    cellText = document.createTextNode("Orizin");
+                }
+                if(j == 4 && i == 2){
+                    cell = document.createElement("th");
+                    cell.classList = "frurozinVariable"
+                    cellText = document.createTextNode("Frurozin");
+                }
+                if(j == 5 && i == 2){
+                    cell = document.createElement("th");
+                    cell.classList = "goldVariable"
+                    cellText = document.createTextNode("Gold");
+                }
+                if(j == 6 && i == 2){
+                    cell = document.createElement("th");
+                    cell.classList = ""
+                    cellText = document.createTextNode("Dauer");
+                }
+                if(j == 0 && i == 1){
+                    cell = document.createElement("td");
+                    cell.appendChild(select)
+                   // cell.classList = "constructionName"
+                    cell.id = "tab_buildName"
+                    cellText = document.createTextNode("");
+                }
+                if(j == 1 && i == 1){
+                    cell = document.createElement("td");
+                    cell.appendChild(input_lvl)
+                    cellText = document.createTextNode("");
+                }
+
+                if(j == 0 && i == 3){
+                    cell = document.createElement("td");
+                    cell.classList = "roheisenVariable"
+                    cell.id = "tab_res_fe"
+                    cellText = document.createTextNode($.number( currentRes[RES_FE], 0, ',', '.'));
+                }
+                if(j == 1 && i == 3){
+                    cell = document.createElement("td");
+                    cell.classList = "kristallVariable"
+                    cell.id = "tab_res_kr"
+                    cellText = document.createTextNode($.number( currentRes[RES_KR], 0, ',', '.'));
+                }
+                if(j == 2 && i == 3){
+                    cell = document.createElement("td");
+                    cell.classList = "frubinVariable"
+                    cell.id = "tab_res_fr"
+                    cellText = document.createTextNode($.number( currentRes[RES_FR], 0, ',', '.'));
+                }
+                if(j == 3 && i == 3){
+                    cell = document.createElement("td");
+                    cell.classList = "orizinVariable"
+                    cell.id = "tab_res_or"
+                    cellText = document.createTextNode($.number( currentRes[RES_OR], 0, ',', '.'));
+                }
+                if(j == 4 && i == 3){
+                    cell = document.createElement("td");
+                    cell.classList = "frurozinVariable"
+                    cell.id = "tab_res_fu"
+                    cellText = document.createTextNode($.number( currentRes[RES_FU], 0, ',', '.'));
+                }
+                if(j == 5 && i == 3){
+                    cell = document.createElement("td");
+                    cell.classList = "goldVariable"
+                    cell.id = "tab_res_au"
+                    cellText = document.createTextNode($.number( currentRes[RES_AU], 0, ',', '.'));
+                }
+
+                if(cell != null)cell.appendChild(cellText);
+                if(cell != null)row.appendChild(cell);
+            }
+            if(i > 1) tbl2Body.appendChild(row);
+            if(i <=1) tbl1Body.appendChild(row);
+        }
+        tbl1.appendChild(tbl1Body)
+        tbl2.appendChild(tbl2Body);
+        div.appendChild(tbl1)
+        div.appendChild(tbl2)
+        return div
 }
 
     function checkLvl(id){
