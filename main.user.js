@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         LastWar Utilitys
 // @namespace    http://tampermonkey.net/
-// @version      1.1.2
+// @version      1.1.3
 // @description  Tool for LastWar
 // @author       Revan
 // @match        http*://*.last-war.de/main.php*
@@ -493,12 +493,12 @@
         var id = select.selectedIndex
         var reserve = 10
         var currentRes = build[id][RES](document.getElementById("input-lvl").value-1)
-        var trade_FE = Math.ceil(currentRes[RES_FE]*(1+window.lose/100)-(window.Roheisen))
-        var trade_KR = Math.ceil(currentRes[RES_KR]*(1+window.lose/100)-(window.Kristall))
-        var trade_FR = Math.ceil(currentRes[RES_FR]*(1+window.lose/100)-(window.Frubin))
-        var trade_OR = Math.ceil(currentRes[RES_OR]*(1+window.lose/100)-(window.Orizin))
-        var trade_FU = Math.ceil(currentRes[RES_FU]*(1+window.lose/100)-(window.Frurozin))
-        var trade_AU = Math.ceil(currentRes[RES_AU]*(1+window.lose/100)-(window.Gold))
+        var trade_FE = Math.ceil(currentRes[RES_FE]*(1+window.lose/100)-(window.Roheisen)-window.getResourcePerHour()[0].roheisen)
+        var trade_KR = Math.ceil(currentRes[RES_KR]*(1+window.lose/100)-(window.Kristall)-window.getResourcePerHour()[0].kristall)
+        var trade_FR = Math.ceil(currentRes[RES_FR]*(1+window.lose/100)-(window.Frubin)-window.getResourcePerHour()[0].frubin)
+        var trade_OR = Math.ceil(currentRes[RES_OR]*(1+window.lose/100)-(window.Orizin)-window.getResourcePerHour()[0].orizin)
+        var trade_FU = Math.ceil(currentRes[RES_FU]*(1+window.lose/100)-(window.Frurozin)-window.getResourcePerHour()[0].frurozin)
+        var trade_AU = Math.ceil(currentRes[RES_AU]*(1+window.lose/100)-(window.Gold)-window.getResourcePerHour()[0].gold)
         if(trade_FE > 0) {document.getElementById("his_eisen").value = trade_FE + reserve} else document.getElementById("his_eisen").value = 0
         if(trade_KR > 0) {document.getElementById("his_kristall").value = trade_KR + reserve} else document.getElementById("his_kristall").value = 0
         if(trade_FR > 0) {document.getElementById("his_frubin").value = trade_FR + reserve} else document.getElementById("his_frubin").value = 0
