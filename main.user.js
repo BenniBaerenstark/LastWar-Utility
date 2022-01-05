@@ -40,6 +40,12 @@
     const ORIZIN = 12
     const FUROZIN = 13
     const GOLD = 1
+    const EISENLAGER = 14
+    const KRISLAGER = 15
+    const FRUBLAGER = 16
+    const ORILAGER = 17
+    const FUROLAGER = 18
+    const GOLDLAGER = 19
 
     const INDEX_BZ = 0
     const INDEX_FE = 1
@@ -49,6 +55,12 @@
     const INDEX_FU = 5
     const INDEX_AU = 6
     const INDEX_HQ = 7
+    const INDEX_FEL = 8
+    const INDEX_KRL = 9
+    const INDEX_FRL = 10
+    const INDEX_ORL = 11
+    const INDEX_FUL = 12
+    const INDEX_AUL = 13
 
     const RES_FE = 0
     const RES_KR = 1
@@ -580,6 +592,12 @@
     build[INDEX_FU] = new Array()
     build[INDEX_AU] = new Array()
     build[INDEX_HQ] = new Array()
+    build[INDEX_FEL] = new Array()
+    build[INDEX_KRL] = new Array()
+    build[INDEX_FRL] = new Array()
+    build[INDEX_ORL] = new Array()
+    build[INDEX_FUL] = new Array()
+    build[INDEX_AUL] = new Array()
 
     build[INDEX_BZ][LW_ID] = BAUZENTRALE
     build[INDEX_FE][LW_ID] = ROHEISEN
@@ -589,6 +607,12 @@
     build[INDEX_FU][LW_ID] = FUROZIN
     build[INDEX_AU][LW_ID] = GOLD
     build[INDEX_HQ][LW_ID] = HAUPTQUARTIER
+    build[INDEX_FEL][LW_ID] = EISENLAGER
+    build[INDEX_KRL][LW_ID] = KRISLAGER
+    build[INDEX_FRL][LW_ID] = FRUBLAGER
+    build[INDEX_ORL][LW_ID] = ORILAGER
+    build[INDEX_FUL][LW_ID] = FUROLAGER
+    build[INDEX_AUL][LW_ID] = GOLDLAGER
 
     build[INDEX_BZ][STRING] = "Bauzentrale"
     build[INDEX_FE][STRING] = "Roheisen Mine"
@@ -598,6 +622,12 @@
     build[INDEX_FU][STRING] = "Frurozin Herstellung"
     build[INDEX_AU][STRING] = "Gold Mine"
     build[INDEX_HQ][STRING] = "Hauptquartier"
+    build[INDEX_FEL][STRING] = "Roheisen Lager"
+    build[INDEX_KRL][STRING] = "Kristall Lager"
+    build[INDEX_FRL][STRING] = "Frubin Lager"
+    build[INDEX_ORL][STRING] = "Orizin Lager"
+    build[INDEX_FUL][STRING] = "Frurozin Lager"
+    build[INDEX_AUL][STRING] = "Gold Lager"
 
     build[INDEX_BZ][RES] = ress_BZ
     build[INDEX_FE][RES] = ress_FE
@@ -607,6 +637,12 @@
     build[INDEX_FU][RES] = ress_FU
     build[INDEX_AU][RES] = ress_AU
     build[INDEX_HQ][RES] = ress_HQ
+    build[INDEX_FEL][RES] = ress_FEL
+    build[INDEX_KRL][RES] = ress_KRL
+    build[INDEX_FRL][RES] = ress_FRL
+    build[INDEX_ORL][RES] = ress_ORL
+    build[INDEX_FUL][RES] = ress_FUL
+    build[INDEX_AUL][RES] = ress_AUL
 
     updateLvl()
 
@@ -689,8 +725,75 @@
 
     function ress_HQ(lvl){
         var res = new Array()
-        res[RES_FE] = (320*(parseInt(lvl)+1)+80)
-        res[RES_KR] = (120*(parseInt(lvl)+1)+30)
+        res[RES_FE] = 0
+        res[RES_KR] = 0
+        res[RES_FR] = 0
+        res[RES_OR] = 0
+        res[RES_FU] = 0
+        res[RES_AU] = 0
+        return res
+    }
+
+
+    function ress_FEL(lvl){
+        var res = new Array()
+        res[RES_FE] = Math.round(Math.pow((parseInt(lvl)+1)*400/20, 2)+400)
+        res[RES_KR] = 0
+        res[RES_FR] = Math.round(Math.pow((parseInt(lvl)+1)*300/20, 2)+300)
+        res[RES_OR] = 0
+        res[RES_FU] = Math.round(Math.pow((parseInt(lvl)+1)*140/20, 2)+140)
+        res[RES_AU] = 0
+        return res
+    }
+
+    function ress_KRL(lvl){
+        var res = new Array()
+        res[RES_FE] = Math.round(Math.pow((parseInt(lvl)+1)*350/20, 2)+350)
+        res[RES_KR] = Math.round(Math.pow((parseInt(lvl)+1)*150/20, 2)+150)
+        res[RES_FR] = Math.round(Math.pow((parseInt(lvl)+1)*300/20, 2)+300)
+        res[RES_OR] = 0
+        res[RES_FU] = Math.round(Math.pow((parseInt(lvl)+1)*80/20, 2)+80)
+        res[RES_AU] = 0
+        return res
+    }
+
+    function ress_FRL(lvl){
+        var res = new Array()
+        res[RES_FE] = 0
+        res[RES_KR] = 0
+        res[RES_FR] = 0
+        res[RES_OR] = 0
+        res[RES_FU] = 0
+        res[RES_AU] = 0
+        return res
+    }
+
+    function ress_ORL(lvl){
+        var res = new Array()
+        res[RES_FE] = 0
+        res[RES_KR] = 0
+        res[RES_FR] = 0
+        res[RES_OR] = 0
+        res[RES_FU] = 0
+        res[RES_AU] = 0
+        return res
+    }
+
+    function ress_FUL(lvl){
+        var res = new Array()
+        res[RES_FE] = 0
+        res[RES_KR] = 0
+        res[RES_FR] = 0
+        res[RES_OR] = 0
+        res[RES_FU] = 0
+        res[RES_AU] = 0
+        return res
+    }
+
+    function ress_AUL(lvl){
+        var res = new Array()
+        res[RES_FE] = 0
+        res[RES_KR] = 0
         res[RES_FR] = 0
         res[RES_OR] = 0
         res[RES_FU] = 0
