@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         LastWar Utilities
 // @namespace    http://tampermonkey.net/
-// @version      1.1.4
+// @version      1.2.0
 // @description  Tool for LastWar
 // @author       Revan
 // @match        http*://*.last-war.de/main.php*
@@ -17,16 +17,6 @@
     var select
     var parent
     var input_lvl
-
-    var BuildingNumber = window.BuildingNumber
-
-    var getBuildingTime = window.getBuildingTime
-    var RoheisenMineBuildingTime = window.RoheisenMineBuildingTime
-    var KristallBuildingTime = window.KristallBuildingTime
-    var FrubinBuildingTime = window.FrubinBuildingTime
-    var OrizinBuildingTime = window.OrizinBuildingTime
-    var FrurozinBuildingTime = window.FrurozinBuildingTime
-    var GoldBuildingTime = window.GoldBuildingTime
 
     var $ = window.$
 
@@ -48,19 +38,19 @@
     const GOLDLAGER = 19
 
     const INDEX_BZ = 0
-    const INDEX_FE = 1
-    const INDEX_KR = 2
-    const INDEX_FR = 3
-    const INDEX_OR = 4
-    const INDEX_FU = 5
-    const INDEX_AU = 6
-    const INDEX_HQ = 7
-    const INDEX_FEL = 8
-    const INDEX_KRL = 9
-    const INDEX_FRL = 10
-    const INDEX_ORL = 11
-    const INDEX_FUL = 12
-    const INDEX_AUL = 13
+    const INDEX_FE = 10
+    const INDEX_KR = 11
+    const INDEX_FR = 12
+    const INDEX_OR = 13
+    const INDEX_FU = 14
+    const INDEX_AU = 15
+    const INDEX_HQ = 1
+    const INDEX_FEL = 20
+    const INDEX_KRL = 22
+    const INDEX_FRL = 23
+    const INDEX_ORL = 24
+    const INDEX_FUL = 25
+    const INDEX_AUL = 26
 
     const RES_FE = 0
     const RES_KR = 1
@@ -104,15 +94,50 @@
         select.id = "buildSelect"
         if (window.innerWidth > 600) select.style.fontSize = "17px";
         else select.style.fontSize = "12px";
-        for (const val of values) {
-            var option = document.createElement("option");
-            option.value = val;
-            option.text = val.charAt(0).toUpperCase() + val.slice(1);
-            select.appendChild(option);
-        }
         select.addEventListener ("change", function () {
             updateTable1()
         })
+
+        var optionGroup_haupt = document.createElement('OPTGROUP')
+        optionGroup_haupt.label = "Hauptgebäude"
+        var optionGroup_res = document.createElement('OPTGROUP')
+        optionGroup_res.label = "Rohstoffgebäude"
+        var optionGroup_lager = document.createElement('OPTGROUP')
+        optionGroup_lager.label = "Lagergebäude"
+        
+        for (var i= 0; i < 10; i++) {
+            if(build[i]!=null){
+                var option = document.createElement("option");
+                option.value = i
+                option.text = build[i][STRING]
+                optionGroup_haupt.appendChild(option);
+            }
+            
+        }
+        select.appendChild(optionGroup_haupt)
+
+        for ( i= 10; i < 20; i++) {
+            if(build[i]!=null){
+                option = document.createElement("option");
+                option.value = i
+                option.text = build[i][STRING]
+                optionGroup_res.appendChild(option);
+            }
+
+        }
+        select.appendChild(optionGroup_res)
+
+        for ( i= 20; i < 30; i++) {
+            if(build[i]!=null){
+                option = document.createElement("option");
+                option.value = i
+                option.text = build[i][STRING]
+                optionGroup_lager.appendChild(option);
+            }
+
+        }
+        select.appendChild(optionGroup_lager)
+        
     }
 
     function generatePage(){
@@ -426,7 +451,9 @@
     function updateTable1(){
         console.log("select changed")
         updateLvl()
-        var id = select.selectedIndex
+        var id = select.value
+        console.log(id)
+        console.log(build[id][STRING])
         var currentRes = build[id][RES](checkLvl(id))
         document.getElementById("input-lvl").value = checkLvl(id)+1
         document.getElementById("tab_res_fe").innerText = $.number(currentRes[RES_FE], 0, ',', '.')
@@ -455,7 +482,7 @@
     function updateTable2(){
         console.log("input changed")
         updateLvl()
-        var id = select.selectedIndex
+        var id = select.value
         var currentRes = build[id][RES](document.getElementById("input-lvl").value)
         document.getElementById("tab_res_fe").innerText = $.number(currentRes[RES_FE], 0, ',', '.')
         document.getElementById("tab_res_kr").innerText = $.number(currentRes[RES_KR], 0, ',', '.')
@@ -481,7 +508,7 @@
     }
 
     function setTrade(){
-        var id = select.selectedIndex
+        var id = select.value
         var currentRes = build[id][RES](document.getElementById("input-lvl").value-1)
         document.getElementById("his_eisen").value = currentRes[RES_FE]
         document.getElementById("his_kristall").value = currentRes[RES_KR]
@@ -502,7 +529,7 @@
     }
 
     function setTradePlus(){
-        var id = select.selectedIndex
+        var id = select.value
         var reserve = 10
         var currentRes = build[id][RES](document.getElementById("input-lvl").value-1)
         var trade_FE = Math.ceil(currentRes[RES_FE]*(1+window.lose/100)-(window.Roheisen)-window.getResourcePerHour()[0].roheisen)
@@ -530,7 +557,7 @@
     }
 
     function setSave(){
-        var id = select.selectedIndex
+        var id = select.value
         var currentRes = build[id][RES](document.getElementById("input-lvl").value-1)
         document.getElementById("my_eisen").value = currentRes[RES_FE]
         document.getElementById("my_kristall").value = currentRes[RES_KR]
@@ -576,6 +603,12 @@
         build[INDEX_FU][LVL] = window.lvlFrurozin
         build[INDEX_AU][LVL] = window.lvlGold
         build[INDEX_HQ][LVL] = window.lvlHauptquartier
+        build[INDEX_FEL][LVL] = window.lvlRoheisenLager
+        build[INDEX_KRL][LVL] = window.lvlKristallLager
+        build[INDEX_FRL][LVL] = window.lvlFrubinLager
+        build[INDEX_ORL][LVL] = window.lvlOrizinLager
+        build[INDEX_FUL][LVL] = window.lvlFrurozinLager
+        build[INDEX_AUL][LVL] = window.lvlGoldLager
     }
 
     var build = new Array()
@@ -759,9 +792,9 @@
 
     function ress_FRL(lvl){
         var res = new Array()
-        res[RES_FE] = 0
+        res[RES_FE] = Math.round(Math.pow((parseInt(lvl)+1)*350/20, 2)+350)
         res[RES_KR] = 0
-        res[RES_FR] = 0
+        res[RES_FR] = Math.round(Math.pow((parseInt(lvl)+1)*350/20, 2)+350)
         res[RES_OR] = 0
         res[RES_FU] = 0
         res[RES_AU] = 0
@@ -770,9 +803,9 @@
 
     function ress_ORL(lvl){
         var res = new Array()
-        res[RES_FE] = 0
+        res[RES_FE] = Math.round(Math.pow((parseInt(lvl)+1)*400/20, 2)+400)
         res[RES_KR] = 0
-        res[RES_FR] = 0
+        res[RES_FR] = Math.round(Math.pow((parseInt(lvl)+1)*300/20, 2)+300)
         res[RES_OR] = 0
         res[RES_FU] = 0
         res[RES_AU] = 0
@@ -781,9 +814,9 @@
 
     function ress_FUL(lvl){
         var res = new Array()
-        res[RES_FE] = 0
+        res[RES_FE] = Math.round(Math.pow((parseInt(lvl)+1)*350/20, 2)+350)
         res[RES_KR] = 0
-        res[RES_FR] = 0
+        res[RES_FR] = Math.round(Math.pow((parseInt(lvl)+1)*350/20, 2)+350)
         res[RES_OR] = 0
         res[RES_FU] = 0
         res[RES_AU] = 0
@@ -792,11 +825,11 @@
 
     function ress_AUL(lvl){
         var res = new Array()
-        res[RES_FE] = 0
+        res[RES_FE] = Math.round(Math.pow((parseInt(lvl)+1)*25/1, 2)+500)
         res[RES_KR] = 0
-        res[RES_FR] = 0
+        res[RES_FR] = Math.round(Math.pow((parseInt(lvl)+1)*17.5/1, 2)+350)
         res[RES_OR] = 0
-        res[RES_FU] = 0
+        res[RES_FU] = Math.round(Math.pow((parseInt(lvl)+1)*7.5/1, 2)+150)
         res[RES_AU] = 0
         return res
     }
