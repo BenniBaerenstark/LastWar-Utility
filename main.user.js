@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         LastWar Utilities
 // @namespace    http://tampermonkey.net/
-// @version      1.2.0
+// @version      1.2.2
 // @description  Tool for LastWar
 // @author       Revan
 // @match        http*://*.last-war.de/main.php*
@@ -36,21 +36,53 @@
     const ORILAGER = 17
     const FUROLAGER = 18
     const GOLDLAGER = 19
+    const FORSCHUNG = 7
+    const SPIOSTATION = 8
 
-    const INDEX_BZ = 0
+    const KERNKRAFTWERK = -1
+    const FUSIONSKRAFTWERK = -1
+    const WERFT = -1
+    const VERTEIDIGUNG = -1
+    const SPIOABWEHR = -1
+    const FRUHWARN = -1
+    const HANDELSPOSTEN = -1
+    const HANDELSZENTRUM = -1
+    const BANKK = -1
+    const GEHEIMDIENST = -1
+    const KREDIT = -1
+    const WERKSTATT = -1
+    const RECYCLING = -1
+
+    const INDEX_HQ = 0
+    const INDEX_BZ = 1
+    const INDEX_FZ = 2
+    const INDEX_SS = 3
     const INDEX_FE = 10
     const INDEX_KR = 11
     const INDEX_FR = 12
     const INDEX_OR = 13
     const INDEX_FU = 14
     const INDEX_AU = 15
-    const INDEX_HQ = 1
     const INDEX_FEL = 20
     const INDEX_KRL = 22
     const INDEX_FRL = 23
     const INDEX_ORL = 24
     const INDEX_FUL = 25
     const INDEX_AUL = 26
+    const INDEX_KKW = 30
+    const INDEX_FKW = 31
+    const INDEX_RSF = 40
+    const INDEX_VTS = 41
+    const INDEX_SPA = 42
+    const INDEX_FWA = 43
+    const INDEX_HP = 50
+    const INDEX_HZ = 51
+    const INDEX_BA = 52
+    const INDEX_GDZ = 60
+    const INDEX_KRE = 61
+    const INDEX_WER = 62
+    const INDEX_REC = 63
+
 
     const RES_FE = 0
     const RES_KR = 1
@@ -104,6 +136,14 @@
         optionGroup_res.label = "Rohstoffgebäude"
         var optionGroup_lager = document.createElement('OPTGROUP')
         optionGroup_lager.label = "Lagergebäude"
+        var optionGroup_energie = document.createElement('OPTGROUP')
+        optionGroup_energie.label = "Energiegebäude"
+        var optionGroup_rsf = document.createElement('OPTGROUP')
+        optionGroup_rsf.label = "Raumschiff- und Verteidigungsgebäude"
+        var optionGroup_handel = document.createElement('OPTGROUP')
+        optionGroup_handel.label = "Handelsgebäude"
+        var optionGroup_special = document.createElement('OPTGROUP')
+        optionGroup_special.label = "Special Building"
         
         for (var i= 0; i < 10; i++) {
             if(build[i]!=null){
@@ -137,6 +177,51 @@
 
         }
         select.appendChild(optionGroup_lager)
+
+        for ( i= 30; i < 40; i++) {
+            if(build[i]!=null){
+                option = document.createElement("option");
+                option.value = i
+                option.text = build[i][STRING]
+                optionGroup_energie.appendChild(option);
+            }
+
+        }
+        //select.appendChild(optionGroup_energie)
+
+        for ( i= 40; i < 50; i++) {
+            if(build[i]!=null){
+                option = document.createElement("option");
+                option.value = i
+                option.text = build[i][STRING]
+                optionGroup_rsf.appendChild(option);
+            }
+
+        }
+        //select.appendChild(optionGroup_rsf)
+
+        for ( i= 50; i < 60; i++) {
+            if(build[i]!=null){
+                option = document.createElement("option");
+                option.value = i
+                option.text = build[i][STRING]
+                optionGroup_handel.appendChild(option);
+            }
+
+        }
+        //select.appendChild(optionGroup_handel)
+
+        for ( i= 60; i < 70; i++) {
+            if(build[i]!=null){
+                option = document.createElement("option");
+                option.value = i
+                option.text = build[i][STRING]
+                optionGroup_special.appendChild(option);
+            }
+
+        }
+        //select.appendChild(optionGroup_special)
+        select.value = 1
         
     }
 
@@ -168,8 +253,8 @@
         div.appendChild(document.createElement("p"))
         generateSelector()
 
-        if (window.innerWidth > 600) div.appendChild(generate_tableWide(0))
-        else div.appendChild(generate_tableNarrow(0))
+        if (window.innerWidth > 600) div.appendChild(generate_tableWide(1))
+        else div.appendChild(generate_tableNarrow(1))
         div.appendChild(btn3)
         div.appendChild(btn)
         div.appendChild(btn2)
@@ -444,16 +529,13 @@
 }
 
     function checkLvl(id){
-        if (build[id][LW_ID] == window.BuildingNumber || build[id][LW_ID] == window.BuildingNumber) return build[id][LVL] + 1
+        if (build[id][LW_ID] == window.BuildingNumber || build[id][LW_ID] == window.BuildingNumber2) return build[id][LVL] + 1
         return build[id][LVL]
     }
 
     function updateTable1(){
-        console.log("select changed")
         updateLvl()
         var id = select.value
-        console.log(id)
-        console.log(build[id][STRING])
         var currentRes = build[id][RES](checkLvl(id))
         document.getElementById("input-lvl").value = checkLvl(id)+1
         document.getElementById("tab_res_fe").innerText = $.number(currentRes[RES_FE], 0, ',', '.')
@@ -480,7 +562,6 @@
     }
 
     function updateTable2(){
-        console.log("input changed")
         updateLvl()
         var id = select.value
         var currentRes = build[id][RES](document.getElementById("input-lvl").value)
@@ -595,14 +676,16 @@
     }
 
     function updateLvl(){
+        build[INDEX_HQ][LVL] = window.lvlHauptquartier
         build[INDEX_BZ][LVL] = window.lvlBauzentrale
+        build[INDEX_FZ][LVL] = window.lvlForschungszentrale
+        build[INDEX_SS][LVL] = window.lvlSpionagestation
         build[INDEX_FE][LVL] = window.lvlRoheisen
         build[INDEX_KR][LVL] = window.lvlKristall
         build[INDEX_FR][LVL] = window.lvlFrubin
         build[INDEX_OR][LVL] = window.lvlOrizin
         build[INDEX_FU][LVL] = window.lvlFrurozin
         build[INDEX_AU][LVL] = window.lvlGold
-        build[INDEX_HQ][LVL] = window.lvlHauptquartier
         build[INDEX_FEL][LVL] = window.lvlRoheisenLager
         build[INDEX_KRL][LVL] = window.lvlKristallLager
         build[INDEX_FRL][LVL] = window.lvlFrubinLager
@@ -617,59 +700,107 @@
     const LVL = 2
     const RES = 3
 
+    build[INDEX_HQ] = new Array()
     build[INDEX_BZ] = new Array()
+    build[INDEX_FZ] = new Array()
+    build[INDEX_SS] = new Array()
     build[INDEX_FE] = new Array()
     build[INDEX_KR] = new Array()
     build[INDEX_FR] = new Array()
     build[INDEX_OR] = new Array()
     build[INDEX_FU] = new Array()
     build[INDEX_AU] = new Array()
-    build[INDEX_HQ] = new Array()
     build[INDEX_FEL] = new Array()
     build[INDEX_KRL] = new Array()
     build[INDEX_FRL] = new Array()
     build[INDEX_ORL] = new Array()
     build[INDEX_FUL] = new Array()
     build[INDEX_AUL] = new Array()
+    build[INDEX_KKW] = new Array()
+    build[INDEX_FKW] = new Array()
+    build[INDEX_RSF] = new Array()
+    build[INDEX_VTS] = new Array()
+    build[INDEX_SPA] = new Array()
+    build[INDEX_FWA] = new Array()
+    build[INDEX_HP] = new Array()
+    build[INDEX_HZ] = new Array()
+    build[INDEX_BA] = new Array()
+    build[INDEX_GDZ] = new Array()
+    build[INDEX_KRE] = new Array()
+    build[INDEX_WER] = new Array()
+    build[INDEX_REC] = new Array()
 
+    build[INDEX_HQ][LW_ID] = HAUPTQUARTIER
     build[INDEX_BZ][LW_ID] = BAUZENTRALE
+    build[INDEX_FZ][LW_ID] = FORSCHUNG
+    build[INDEX_SS][LW_ID] = SPIOSTATION
     build[INDEX_FE][LW_ID] = ROHEISEN
     build[INDEX_KR][LW_ID] = KRISTALL
     build[INDEX_FR][LW_ID] = FRUBIN
     build[INDEX_OR][LW_ID] = ORIZIN
     build[INDEX_FU][LW_ID] = FUROZIN
     build[INDEX_AU][LW_ID] = GOLD
-    build[INDEX_HQ][LW_ID] = HAUPTQUARTIER
     build[INDEX_FEL][LW_ID] = EISENLAGER
     build[INDEX_KRL][LW_ID] = KRISLAGER
     build[INDEX_FRL][LW_ID] = FRUBLAGER
     build[INDEX_ORL][LW_ID] = ORILAGER
     build[INDEX_FUL][LW_ID] = FUROLAGER
     build[INDEX_AUL][LW_ID] = GOLDLAGER
+    build[INDEX_KKW][LW_ID] = KERNKRAFTWERK
+    build[INDEX_FKW][LW_ID] = FUSIONSKRAFTWERK
+    build[INDEX_RSF][LW_ID] = WERFT
+    build[INDEX_VTS][LW_ID] = VERTEIDIGUNG
+    build[INDEX_SPA][LW_ID] = SPIOABWEHR
+    build[INDEX_FWA][LW_ID] = FRUHWARN
+    build[INDEX_HP][LW_ID] = HANDELSPOSTEN
+    build[INDEX_HZ][LW_ID] = HANDELSZENTRUM
+    build[INDEX_BA][LW_ID] = BANKK
+    build[INDEX_GDZ][LW_ID] = GEHEIMDIENST
+    build[INDEX_KRE][LW_ID] = KREDIT
+    build[INDEX_WER][LW_ID] = WERKSTATT
+    build[INDEX_REC][LW_ID] = RECYCLING
 
+
+    build[INDEX_HQ][STRING] = "Hauptquartier"
     build[INDEX_BZ][STRING] = "Bauzentrale"
+    build[INDEX_FZ][STRING] = "Forschungszentrale"
+    build[INDEX_SS][STRING] = "Spionagestation"
     build[INDEX_FE][STRING] = "Roheisen Mine"
     build[INDEX_KR][STRING] = "Kristall Förderungsanlage"
     build[INDEX_FR][STRING] = "Frubin Sammler"
     build[INDEX_OR][STRING] = "Orizin Gewinnungsanlage"
     build[INDEX_FU][STRING] = "Frurozin Herstellung"
     build[INDEX_AU][STRING] = "Gold Mine"
-    build[INDEX_HQ][STRING] = "Hauptquartier"
     build[INDEX_FEL][STRING] = "Roheisen Lager"
     build[INDEX_KRL][STRING] = "Kristall Lager"
     build[INDEX_FRL][STRING] = "Frubin Lager"
     build[INDEX_ORL][STRING] = "Orizin Lager"
     build[INDEX_FUL][STRING] = "Frurozin Lager"
     build[INDEX_AUL][STRING] = "Gold Lager"
+    build[INDEX_KKW][STRING] = "Kernkraftwerk"
+    build[INDEX_FKW][STRING] = "Fusionskraftwerk"
+    build[INDEX_RSF][STRING] = "Raumschiff Fabrik"
+    build[INDEX_VTS][STRING] = "Verteidigungsstation"
+    build[INDEX_SPA][STRING] = "Spionageabwehr"
+    build[INDEX_FWA][STRING] = "Frühwarnanlage"
+    build[INDEX_HP][STRING] = "Handelsposten"
+    build[INDEX_HZ][STRING] = "Handelszentrum"
+    build[INDEX_BA][STRING] = "Bank"
+    build[INDEX_GDZ][STRING] = "Geheimdienstzentrum"
+    build[INDEX_KRE][STRING] = "Kreditinstitut"
+    build[INDEX_WER][STRING] = "Werkstatt"
+    build[INDEX_REC][STRING] = "Recycling Anlage"
 
+    build[INDEX_HQ][RES] = ress_HQ
     build[INDEX_BZ][RES] = ress_BZ
+    build[INDEX_FZ][RES] = ress_FZ
+    build[INDEX_SS][RES] = ress_SS
     build[INDEX_FE][RES] = ress_FE
     build[INDEX_KR][RES] = ress_KR
     build[INDEX_FR][RES] = ress_FR
     build[INDEX_OR][RES] = ress_OR
     build[INDEX_FU][RES] = ress_FU
     build[INDEX_AU][RES] = ress_AU
-    build[INDEX_HQ][RES] = ress_HQ
     build[INDEX_FEL][RES] = ress_FEL
     build[INDEX_KRL][RES] = ress_KRL
     build[INDEX_FRL][RES] = ress_FRL
@@ -679,11 +810,44 @@
 
     updateLvl()
 
+    function ress_HQ(lvl){
+        var res = new Array()
+        res[RES_FE] = 320*(parseInt(lvl)+1)+80
+        res[RES_KR] = 120*(parseInt(lvl)+1)+30
+        res[RES_FR] = 0
+        res[RES_OR] = 0
+        res[RES_FU] = 0
+        res[RES_AU] = 0
+        return res
+    }
+
     function ress_BZ(lvl){
         var res = new Array()
         res[RES_FE] = (240*(parseInt(lvl)+1)+60)
         res[RES_KR] = (120*(parseInt(lvl)+1)+30)
         res[RES_FR] = 0
+        res[RES_OR] = 0
+        res[RES_FU] = 0
+        res[RES_AU] = 0
+        return res
+    }
+
+        function ress_FZ(lvl){
+        var res = new Array()
+        res[RES_FE] = Math.round(400*(1+(parseInt(lvl)+1)*0.8))
+        res[RES_KR] = 0
+        res[RES_FR] = Math.round(100*(1+(parseInt(lvl)+1)*0.8))
+        res[RES_OR] = Math.round(100*(1+(parseInt(lvl)+1)*0.8))
+        res[RES_FU] = 0
+        res[RES_AU] = 0
+        return res
+    }
+
+        function ress_SS(lvl){
+        var res = new Array()
+        res[RES_FE] = Math.round(750*(1+(parseInt(lvl)+1)*0.8))
+        res[RES_KR] = 0
+        res[RES_FR] = Math.round(500*(1+(parseInt(lvl)+1)*0.8))
         res[RES_OR] = 0
         res[RES_FU] = 0
         res[RES_AU] = 0
@@ -755,18 +919,6 @@
         res[RES_AU] = 0
         return res
     }
-
-    function ress_HQ(lvl){
-        var res = new Array()
-        res[RES_FE] = 0
-        res[RES_KR] = 0
-        res[RES_FR] = 0
-        res[RES_OR] = 0
-        res[RES_FU] = 0
-        res[RES_AU] = 0
-        return res
-    }
-
 
     function ress_FEL(lvl){
         var res = new Array()
