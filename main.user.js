@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         LastWar Utilitys
 // @namespace    http://tampermonkey.net/
-// @version      1.0.4
+// @version      1.1.0
 // @description  Tool for LastWar
 // @author       Revan
 // @match        http*://*.last-war.de/main.php*
@@ -68,7 +68,7 @@
 
     function neuerHandelClicked(){
         if (!nIntervId) {
-            nIntervId = setInterval(checkPageLoaded, 400);
+            nIntervId = setInterval(checkPageLoaded, 500);
         }
     }
 
@@ -119,13 +119,19 @@
         btn2.setAttribute("style", "float: none");
         btn2.addEventListener("click", setSave, false);
 
-        var btn_div = document.createElement("div");
+        var btn3 = document.createElement("a");
+        btn3.classList.add("formButtonNewMessage")
+        btn3.innerHTML = "Fordern +"
+        btn3.setAttribute("style", "float: none");
+        btn3.addEventListener("click", setTradePlus, false);
+
 
         parent.appendChild(div)
         div.appendChild(document.createElement("p"))
         generateSelector()
 
         div.appendChild(generate_table(0))
+        div.appendChild(btn3)
         div.appendChild(btn)
         div.appendChild(btn2)
 
@@ -344,6 +350,34 @@
         document.getElementById("planetTrade").value = ""
     }
 
+    function setTradePlus(){
+        var id = select.selectedIndex
+        var reserve = 10
+        var currentRes = build[id][RES](document.getElementById("input-lvl").value-1)
+        var trade_FE = Math.ceil(currentRes[RES_FE]*(1+window.lose/100)-(window.Roheisen))
+        var trade_KR = Math.ceil(currentRes[RES_KR]*(1+window.lose/100)-(window.Kristall))
+        var trade_FR = Math.ceil(currentRes[RES_FR]*(1+window.lose/100)-(window.Frubin))
+        var trade_OR = Math.ceil(currentRes[RES_OR]*(1+window.lose/100)-(window.Orizin))
+        var trade_FU = Math.ceil(currentRes[RES_FU]*(1+window.lose/100)-(window.Frurozin))
+        var trade_AU = Math.ceil(currentRes[RES_AU]*(1+window.lose/100)-(window.Gold))
+        if(trade_FE > 0) {document.getElementById("his_eisen").value = trade_FE + reserve} else document.getElementById("his_eisen").value = 0
+        if(trade_KR > 0) {document.getElementById("his_kristall").value = trade_KR + reserve} else document.getElementById("his_kristall").value = 0
+        if(trade_FR > 0) {document.getElementById("his_frubin").value = trade_FR + reserve} else document.getElementById("his_frubin").value = 0
+        if(trade_OR > 0) {document.getElementById("his_orizin").value = trade_OR + reserve} else document.getElementById("his_orizin").value = 0
+        if(trade_FU > 0) {document.getElementById("his_frurozin").value = trade_FU + reserve} else document.getElementById("his_frurozin").value = 0
+        if(trade_AU > 0) {document.getElementById("his_gold").value = trade_AU + reserve} else document.getElementById("his_gold").value = 0
+        document.getElementById("my_eisen").value = 1
+        document.getElementById("my_kristall").value = 0
+        document.getElementById("my_frubin").value = 0
+        document.getElementById("my_orizin").value = 0
+        document.getElementById("my_frurozin").value = 0
+        document.getElementById("my_gold").value = 0
+        document.getElementById("tradeOfferComment").value = ""
+        document.getElementById("galaxyTrade").value = ""
+        document.getElementById("systemTrade").value = ""
+        document.getElementById("planetTrade").value = ""
+    }
+
     function setSave(){
         var id = select.selectedIndex
         var currentRes = build[id][RES](document.getElementById("input-lvl").value-1)
@@ -367,6 +401,7 @@
         document.getElementById("systemTrade").value = cords_array[1]
         document.getElementById("planetTrade").value = cords_array[2]
     }
+
 
 
     function getBuildNames(){
