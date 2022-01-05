@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         LastWar Utilitys
+// @name         LastWar Utilities
 // @namespace    http://tampermonkey.net/
-// @version      1.1.3
+// @version      1.1.4
 // @description  Tool for LastWar
 // @author       Revan
 // @match        http*://*.last-war.de/main.php*
@@ -308,7 +308,7 @@
                     cell.classList = "constructionName"
                     cellText = document.createTextNode("Stufe");
                 }
-                if(j == 0 && i == 3){
+                if(j == 0 && i == 2){
                     cell = document.createElement("th");
                     cell.classList = "roheisenVariable"
                     cellText = document.createTextNode("Roheisen");
