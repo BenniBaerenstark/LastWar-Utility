@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         LastWar Utilities
 // @namespace    http://tampermonkey.net/
-// @version      1.2.3
+// @version      1.2.4
 // @description  Tool for LastWar
 // @author       Revan
 // @match        http*://*.last-war.de/main.php*
@@ -30,7 +30,7 @@
     const FRUBLAGER = 16
     const ORILAGER = 17
     const FUROLAGER = 18
-    const GOLDLAGER = 19    
+    const GOLDLAGER = 19
     const KERNKRAFTWERK = 20
     const FUSIONSKRAFTWERK = 21
     const WERFT = 22
@@ -198,7 +198,7 @@
             }
 
         }
-        //select.appendChild(optionGroup_rsf)
+        select.appendChild(optionGroup_rsf)
 
         for ( i= 50; i < 60; i++) {
             if(build[i]!=null){
@@ -417,7 +417,7 @@
             if (i == 0) row.classList = "rohstoffgebaude"
             if (i > 0) row.classList = ""
 
-            for (var j = 0; j < 7; j++) {
+            for (var j = 0; j < 6; j++) {
                 var cell = null
                 var cellText = null
                 if(j == 0 && i == 0){
@@ -1048,31 +1048,31 @@
 
     function ress_RSF(lvl){
         var res = new Array()
-        res[RES_FE] = 0
-        res[RES_KR] = 0
+        res[RES_FE] = Math.round(4000*(1+(parseInt(lvl)+1)*0.8))
+        res[RES_KR] = Math.round(350*(1+(parseInt(lvl)+1)*0.8))
         res[RES_FR] = 0
         res[RES_OR] = 0
-        res[RES_FU] = 0
+        res[RES_FU] = Math.round(3000*(1+(parseInt(lvl)+1)*0.8))
         res[RES_AU] = 0
         return res
     }
 
     function ress_VTS(lvl){
         var res = new Array()
-        res[RES_FE] = 0
-        res[RES_KR] = 0
+        res[RES_FE] = Math.round(3250*(1+(parseInt(lvl)+1)*0.8))
+        res[RES_KR] = Math.round(250*(1+(parseInt(lvl)+1)*0.8))
         res[RES_FR] = 0
         res[RES_OR] = 0
-        res[RES_FU] = 0
+        res[RES_FU] = Math.round(2000*(1+(parseInt(lvl)+1)*0.8))
         res[RES_AU] = 0
         return res
     }
 
     function ress_SPA(lvl){
         var res = new Array()
-        res[RES_FE] = 0
+        res[RES_FE] = Math.round(750*(1+(parseInt(lvl)+1)*0.8))
         res[RES_KR] = 0
-        res[RES_FR] = 0
+        res[RES_FR] = Math.round(500*(1+(parseInt(lvl)+1)*0.8))
         res[RES_OR] = 0
         res[RES_FU] = 0
         res[RES_AU] = 0
@@ -1081,9 +1081,9 @@
 
     function ress_FWA(lvl){
         var res = new Array()
-        res[RES_FE] = 0
-        res[RES_KR] = 0
-        res[RES_FR] = 0
+        res[RES_FE] = Math.round(502*(parseInt(lvl)+1)*(parseInt(lvl)+1)+560)
+        res[RES_KR] = Math.round(1024*(parseInt(lvl)+1)*(parseInt(lvl)+1)+800)
+        res[RES_FR] = Math.round(1296*(parseInt(lvl)+1)*(parseInt(lvl)+1)+900)
         res[RES_OR] = 0
         res[RES_FU] = 0
         res[RES_AU] = 0
