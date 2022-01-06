@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         LastWar Utilities
 // @namespace    http://tampermonkey.net/
-// @version      1.2.2
+// @version      1.2.3
 // @description  Tool for LastWar
 // @author       Revan
 // @match        http*://*.last-war.de/main.php*
@@ -14,16 +14,11 @@
 
 (function() {
     'use strict';
-    var select
-    var parent
-    var input_lvl
-
-    var $ = window.$
-
-    let nIntervId
 
     const HAUPTQUARTIER = 5
     const BAUZENTRALE = 6
+    const FORSCHUNG = 7
+    const SPIOSTATION = 8
     const ROHEISEN = 9
     const KRISTALL = 10
     const FRUBIN = 11
@@ -35,23 +30,22 @@
     const FRUBLAGER = 16
     const ORILAGER = 17
     const FUROLAGER = 18
-    const GOLDLAGER = 19
-    const FORSCHUNG = 7
-    const SPIOSTATION = 8
-
-    const KERNKRAFTWERK = -1
-    const FUSIONSKRAFTWERK = -1
-    const WERFT = -1
-    const VERTEIDIGUNG = -1
-    const SPIOABWEHR = -1
-    const FRUHWARN = -1
-    const HANDELSPOSTEN = -1
-    const HANDELSZENTRUM = -1
-    const BANKK = -1
-    const GEHEIMDIENST = -1
-    const KREDIT = -1
-    const WERKSTATT = -1
-    const RECYCLING = -1
+    const GOLDLAGER = 19    
+    const KERNKRAFTWERK = 20
+    const FUSIONSKRAFTWERK = 21
+    const WERFT = 22
+    const VERTEIDIGUNG = 23
+    const SPIOABWEHR = 24
+    const FRUHWARN = 25
+    const AKADEMIE = 26
+    const HANGAR = 27
+    const HANDELSPOSTEN = 28
+    const HANDELSZENTRUM = 29
+    const BANKK = 30
+    const GEHEIMDIENST = 31
+    const KREDIT = 32
+    const WERKSTATT = 33
+    const RECYCLING = 34
 
     const INDEX_HQ = 0
     const INDEX_BZ = 1
@@ -90,6 +84,12 @@
     const RES_OR = 3
     const RES_FU = 4
     const RES_AU = 5
+
+    var select
+    var parent
+    var input_lvl
+
+    let nIntervId
 
     window.onclick = e => {
         if(e.target.innerText == "Neues Handelsangebot stellen"){
@@ -187,7 +187,7 @@
             }
 
         }
-        //select.appendChild(optionGroup_energie)
+        select.appendChild(optionGroup_energie)
 
         for ( i= 40; i < 50; i++) {
             if(build[i]!=null){
@@ -349,37 +349,37 @@
                     cell = document.createElement("td");
                     cell.classList = "roheisenVariable"
                     cell.id = "tab_res_fe"
-                    cellText = document.createTextNode($.number( currentRes[RES_FE], 0, ',', '.'));
+                    cellText = document.createTextNode(window.$.number( currentRes[RES_FE], 0, ',', '.'));
                 }
                 if(j == 3 && i == 1){
                     cell = document.createElement("td");
                     cell.classList = "kristallVariable"
                     cell.id = "tab_res_kr"
-                    cellText = document.createTextNode($.number( currentRes[RES_KR], 0, ',', '.'));
+                    cellText = document.createTextNode(window.$.number( currentRes[RES_KR], 0, ',', '.'));
                 }
                 if(j == 4 && i == 1){
                     cell = document.createElement("td");
                     cell.classList = "frubinVariable"
                     cell.id = "tab_res_fr"
-                    cellText = document.createTextNode($.number( currentRes[RES_FR], 0, ',', '.'));
+                    cellText = document.createTextNode(window.$.number( currentRes[RES_FR], 0, ',', '.'));
                 }
                 if(j == 5 && i == 1){
                     cell = document.createElement("td");
                     cell.classList = "orizinVariable"
                     cell.id = "tab_res_or"
-                    cellText = document.createTextNode($.number( currentRes[RES_OR], 0, ',', '.'));
+                    cellText = document.createTextNode(window.$.number( currentRes[RES_OR], 0, ',', '.'));
                 }
                 if(j == 6 && i == 1){
                     cell = document.createElement("td");
                     cell.classList = "frurozinVariable"
                     cell.id = "tab_res_fu"
-                    cellText = document.createTextNode($.number( currentRes[RES_FU], 0, ',', '.'));
+                    cellText = document.createTextNode(window.$.number( currentRes[RES_FU], 0, ',', '.'));
                 }
                 if(j == 7 && i == 1){
                     cell = document.createElement("td");
                     cell.classList = "goldVariable"
                     cell.id = "tab_res_au"
-                    cellText = document.createTextNode($.number( currentRes[RES_AU], 0, ',', '.'));
+                    cellText = document.createTextNode(window.$.number( currentRes[RES_AU], 0, ',', '.'));
                 }
 
                 cell.appendChild(cellText);
@@ -482,37 +482,37 @@
                     cell = document.createElement("td");
                     cell.classList = "roheisenVariable"
                     cell.id = "tab_res_fe"
-                    cellText = document.createTextNode($.number( currentRes[RES_FE], 0, ',', '.'));
+                    cellText = document.createTextNode(window.$.number( currentRes[RES_FE], 0, ',', '.'));
                 }
                 if(j == 1 && i == 3){
                     cell = document.createElement("td");
                     cell.classList = "kristallVariable"
                     cell.id = "tab_res_kr"
-                    cellText = document.createTextNode($.number( currentRes[RES_KR], 0, ',', '.'));
+                    cellText = document.createTextNode(window.$.number( currentRes[RES_KR], 0, ',', '.'));
                 }
                 if(j == 2 && i == 3){
                     cell = document.createElement("td");
                     cell.classList = "frubinVariable"
                     cell.id = "tab_res_fr"
-                    cellText = document.createTextNode($.number( currentRes[RES_FR], 0, ',', '.'));
+                    cellText = document.createTextNode(window.$.number( currentRes[RES_FR], 0, ',', '.'));
                 }
                 if(j == 3 && i == 3){
                     cell = document.createElement("td");
                     cell.classList = "orizinVariable"
                     cell.id = "tab_res_or"
-                    cellText = document.createTextNode($.number( currentRes[RES_OR], 0, ',', '.'));
+                    cellText = document.createTextNode(window.$.number( currentRes[RES_OR], 0, ',', '.'));
                 }
                 if(j == 4 && i == 3){
                     cell = document.createElement("td");
                     cell.classList = "frurozinVariable"
                     cell.id = "tab_res_fu"
-                    cellText = document.createTextNode($.number( currentRes[RES_FU], 0, ',', '.'));
+                    cellText = document.createTextNode(window.$.number( currentRes[RES_FU], 0, ',', '.'));
                 }
                 if(j == 5 && i == 3){
                     cell = document.createElement("td");
                     cell.classList = "goldVariable"
                     cell.id = "tab_res_au"
-                    cellText = document.createTextNode($.number( currentRes[RES_AU], 0, ',', '.'));
+                    cellText = document.createTextNode(window.$.number( currentRes[RES_AU], 0, ',', '.'));
                 }
 
                 if(cell != null)cell.appendChild(cellText);
@@ -538,12 +538,12 @@
         var id = select.value
         var currentRes = build[id][RES](checkLvl(id))
         document.getElementById("input-lvl").value = checkLvl(id)+1
-        document.getElementById("tab_res_fe").innerText = $.number(currentRes[RES_FE], 0, ',', '.')
-        document.getElementById("tab_res_kr").innerText = $.number(currentRes[RES_KR], 0, ',', '.')
-        document.getElementById("tab_res_fr").innerText = $.number(currentRes[RES_FR], 0, ',', '.')
-        document.getElementById("tab_res_or").innerText = $.number(currentRes[RES_OR], 0, ',', '.')
-        document.getElementById("tab_res_fu").innerText = $.number(currentRes[RES_FU], 0, ',', '.')
-        document.getElementById("tab_res_au").innerText = $.number(currentRes[RES_AU], 0, ',', '.')
+        document.getElementById("tab_res_fe").innerText = window.$.number(currentRes[RES_FE], 0, ',', '.')
+        document.getElementById("tab_res_kr").innerText = window.$.number(currentRes[RES_KR], 0, ',', '.')
+        document.getElementById("tab_res_fr").innerText = window.$.number(currentRes[RES_FR], 0, ',', '.')
+        document.getElementById("tab_res_or").innerText = window.$.number(currentRes[RES_OR], 0, ',', '.')
+        document.getElementById("tab_res_fu").innerText = window.$.number(currentRes[RES_FU], 0, ',', '.')
+        document.getElementById("tab_res_au").innerText = window.$.number(currentRes[RES_AU], 0, ',', '.')
         document.getElementById("my_eisen").value = 0
         document.getElementById("my_kristall").value = 0
         document.getElementById("my_frubin").value = 0
@@ -564,13 +564,18 @@
     function updateTable2(){
         updateLvl()
         var id = select.value
-        var currentRes = build[id][RES](document.getElementById("input-lvl").value)
-        document.getElementById("tab_res_fe").innerText = $.number(currentRes[RES_FE], 0, ',', '.')
-        document.getElementById("tab_res_kr").innerText = $.number(currentRes[RES_KR], 0, ',', '.')
-        document.getElementById("tab_res_fr").innerText = $.number(currentRes[RES_FR], 0, ',', '.')
-        document.getElementById("tab_res_or").innerText = $.number(currentRes[RES_OR], 0, ',', '.')
-        document.getElementById("tab_res_fu").innerText = $.number(currentRes[RES_FU], 0, ',', '.')
-        document.getElementById("tab_res_au").innerText = $.number(currentRes[RES_AU], 0, ',', '.')
+        var lvl_input = document.getElementById("input-lvl").value
+        if(lvl_input < 1) {
+            document.getElementById("input-lvl").value = 1
+            lvl_input = 1
+        }
+        var currentRes = build[id][RES](lvl_input-1)
+        document.getElementById("tab_res_fe").innerText = window.$.number(currentRes[RES_FE], 0, ',', '.')
+        document.getElementById("tab_res_kr").innerText = window.$.number(currentRes[RES_KR], 0, ',', '.')
+        document.getElementById("tab_res_fr").innerText = window.$.number(currentRes[RES_FR], 0, ',', '.')
+        document.getElementById("tab_res_or").innerText = window.$.number(currentRes[RES_OR], 0, ',', '.')
+        document.getElementById("tab_res_fu").innerText = window.$.number(currentRes[RES_FU], 0, ',', '.')
+        document.getElementById("tab_res_au").innerText = window.$.number(currentRes[RES_AU], 0, ',', '.')
         document.getElementById("my_eisen").value = 0
         document.getElementById("my_kristall").value = 0
         document.getElementById("my_frubin").value = 0
@@ -692,6 +697,19 @@
         build[INDEX_ORL][LVL] = window.lvlOrizinLager
         build[INDEX_FUL][LVL] = window.lvlFrurozinLager
         build[INDEX_AUL][LVL] = window.lvlGoldLager
+        build[INDEX_KKW][LVL] = window.lvlKernkraftwerk
+        build[INDEX_FKW][LVL] = window.lvlFusionskraftwerk
+        build[INDEX_RSF][LVL] = window.lvlRaumschiffFabrik
+        build[INDEX_VTS][LVL] = window.lvlVerteidigungsstation
+        build[INDEX_SPA][LVL] = window.lvlVerteidigungsstation
+        build[INDEX_FWA][LVL] = window.lvlFruhwarnanlage
+        build[INDEX_HP][LVL] = window.lvlHandelsposten
+        build[INDEX_HZ][LVL] = window.lvlHandelszentrum
+        build[INDEX_BA][LVL] = window.lvlBank
+        build[INDEX_GDZ][LVL] = window.lvlGeheimdienstzentrum
+        build[INDEX_KRE][LVL] = window.lvlKreditinstitut
+        build[INDEX_WER][LVL] = window.lvlWerkstatt
+        build[INDEX_REC][LVL] = window.lvlRecyclingAnlage
     }
 
     var build = new Array()
@@ -807,6 +825,19 @@
     build[INDEX_ORL][RES] = ress_ORL
     build[INDEX_FUL][RES] = ress_FUL
     build[INDEX_AUL][RES] = ress_AUL
+    build[INDEX_KKW][RES] = ress_KKW
+    build[INDEX_FKW][RES] = ress_FKW
+    build[INDEX_RSF][RES] = ress_RSF
+    build[INDEX_VTS][RES] = ress_VTS
+    build[INDEX_SPA][RES] = ress_SPA
+    build[INDEX_FWA][RES] = ress_FWA
+    build[INDEX_HP][RES] = ress_HP
+    build[INDEX_HZ][RES] = ress_HZ
+    build[INDEX_BA][RES] = ress_BA
+    build[INDEX_GDZ][RES] = ress_GDZ
+    build[INDEX_KRE][RES] = ress_KRE
+    build[INDEX_WER][RES] = ress_WER
+    build[INDEX_REC][RES] = ress_REC
 
     updateLvl()
 
@@ -985,4 +1016,155 @@
         res[RES_AU] = 0
         return res
     }
+
+    function ress_KKW(lvl){
+        var res = new Array()
+        res[RES_FE] = Math.round(150*(1+parseInt(lvl)*0.8))
+        res[RES_KR] = Math.round(500*(1+parseInt(lvl)*0.8))
+        res[RES_FR] = 0
+        res[RES_OR] = 0
+        res[RES_FU] = 0
+        res[RES_AU] = 0
+        return res
+    }
+
+    function ress_FKW(lvl){
+        var res = new Array()
+        if(lvl == 0){
+            res[RES_FE] = 25000
+            res[RES_KR] = 40000
+            res[RES_FR] = 20000
+        }
+        else{
+            res[RES_FE] = (parseInt(lvl) + 1)*20000+25000
+            res[RES_KR] = (parseInt(lvl) + 1)*32000+40000
+            res[RES_FR] = (parseInt(lvl) + 1)*16000+20000
+        }
+        res[RES_OR] = 0
+        res[RES_FU] = 0
+        res[RES_AU] = 0
+        return res
+    }
+
+    function ress_RSF(lvl){
+        var res = new Array()
+        res[RES_FE] = 0
+        res[RES_KR] = 0
+        res[RES_FR] = 0
+        res[RES_OR] = 0
+        res[RES_FU] = 0
+        res[RES_AU] = 0
+        return res
+    }
+
+    function ress_VTS(lvl){
+        var res = new Array()
+        res[RES_FE] = 0
+        res[RES_KR] = 0
+        res[RES_FR] = 0
+        res[RES_OR] = 0
+        res[RES_FU] = 0
+        res[RES_AU] = 0
+        return res
+    }
+
+    function ress_SPA(lvl){
+        var res = new Array()
+        res[RES_FE] = 0
+        res[RES_KR] = 0
+        res[RES_FR] = 0
+        res[RES_OR] = 0
+        res[RES_FU] = 0
+        res[RES_AU] = 0
+        return res
+    }
+
+    function ress_FWA(lvl){
+        var res = new Array()
+        res[RES_FE] = 0
+        res[RES_KR] = 0
+        res[RES_FR] = 0
+        res[RES_OR] = 0
+        res[RES_FU] = 0
+        res[RES_AU] = 0
+        return res
+    }
+
+    function ress_HP(lvl){
+        var res = new Array()
+        res[RES_FE] = 0
+        res[RES_KR] = 0
+        res[RES_FR] = 0
+        res[RES_OR] = 0
+        res[RES_FU] = 0
+        res[RES_AU] = 0
+        return res
+    }
+
+    function ress_HZ(lvl){
+        var res = new Array()
+        res[RES_FE] = 0
+        res[RES_KR] = 0
+        res[RES_FR] = 0
+        res[RES_OR] = 0
+        res[RES_FU] = 0
+        res[RES_AU] = 0
+        return res
+    }
+
+    function ress_BA(lvl){
+        var res = new Array()
+        res[RES_FE] = 0
+        res[RES_KR] = 0
+        res[RES_FR] = 0
+        res[RES_OR] = 0
+        res[RES_FU] = 0
+        res[RES_AU] = 0
+        return res
+    }
+
+    function ress_GDZ(lvl){
+        var res = new Array()
+        res[RES_FE] = 0
+        res[RES_KR] = 0
+        res[RES_FR] = 0
+        res[RES_OR] = 0
+        res[RES_FU] = 0
+        res[RES_AU] = 0
+        return res
+    }
+
+    function ress_KRE(lvl){
+        var res = new Array()
+        res[RES_FE] = 0
+        res[RES_KR] = 0
+        res[RES_FR] = 0
+        res[RES_OR] = 0
+        res[RES_FU] = 0
+        res[RES_AU] = 0
+        return res
+    }
+
+    function ress_WER(lvl){
+        var res = new Array()
+        res[RES_FE] = 0
+        res[RES_KR] = 0
+        res[RES_FR] = 0
+        res[RES_OR] = 0
+        res[RES_FU] = 0
+        res[RES_AU] = 0
+        return res
+    }
+
+    function ress_REC(lvl){
+        var res = new Array()
+        res[RES_FE] = 0
+        res[RES_KR] = 0
+        res[RES_FR] = 0
+        res[RES_OR] = 0
+        res[RES_FU] = 0
+        res[RES_AU] = 0
+        return res
+    }
+
 })();
