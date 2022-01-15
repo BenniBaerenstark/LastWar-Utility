@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         LastWar Utilities
 // @namespace    http://tampermonkey.net/
-// @version      1.3.0
+// @version      1.4.0
 // @description  Tool for LastWar
 // @author       Revan
 // @match        http*://*.last-war.de/main.php*
@@ -15,6 +15,12 @@
 
 (function() {
     'use strict';
+
+
+    //   _____________________________
+    //  |                             |
+    //  |      Building Ress Tool     |
+    //  |_____________________________|
 
     const HAUPTQUARTIER = 5
     const BAUZENTRALE = 6
@@ -93,39 +99,6 @@
     let nIntervId
     let nCheckInt
 
-    var script = document.createElement('script');
-    script.type = 'text/javascript';
-    script.src = '//cdn.jsdelivr.net/npm/sweetalert2@11';
-
-    document.head.appendChild(script);
-
-    addJS_Node (null, null, overrideSelectNativeJS_Functions);
-
-    function overrideSelectNativeJS_Functions () {
-        window.alert = function alert (message) {
-            if(message.includes("error"))return
-            window.Swal.fire({
-                text: message,
-                color: '#62C4CC',
-                background: '#01141D',
-                confirmButtonColor: '#173D47'
-            })
-            console.log(message)
-        }
-    }
-
-    function addJS_Node (text, s_URL, funcToRun) {
-        var D = document;
-        var scriptNode = D.createElement ('script');
-        scriptNode.type = "text/javascript";
-        if (text) scriptNode.textContent = text;
-        if (s_URL) scriptNode.src = s_URL;
-        if (funcToRun) scriptNode.textContent = '(' + funcToRun.toString() + ')()';
-
-        var targ = D.getElementsByTagName ('head')[0] || D.body || D.documentElement;
-        targ.appendChild (scriptNode);
-    }
-
     window.onclick = e => {
         if(e.target.innerText == "Neues Handelsangebot stellen"){
             neuerHandelClicked()
@@ -133,88 +106,6 @@
         if(e.target.className == "fas fa-handshake"){
             neuerHandelClicked()
         }
-    }
-    //setTimeout(checkForMessages,3000)
-    if (!nCheckInt) {
-            //nCheckInt = setInterval(checkForMessages, 1000);
-        }
-
-
-    var idleTime = 0;
-    window.$(document).ready(function () {
-        // Increment the idle time counter every minute.
-        var idleInterval = setInterval(timerIncrement, 1000); // 1 Sekunde
-
-        // Zero the idle timer on mouse movement.
-        window.$(this).mousemove(function (e) {
-            idleTime = 0
-        });
-        window.$(this).keypress(function (e) {
-            idleTime = 0
-        });
-    });
-
-    function timerIncrement() {
-        idleTime = idleTime + 1;
-        if (idleTime > 170 + Math.floor(Math.random() * 20) ){ // about 3 minutes
-            //window.location.reload();
-        }
-    }
-
-    var bellCounter = 0
-    var timeOutSet = false
-
-    var beep = new Audio ("https://soundbible.com//mp3/Fuzzy Beep-SoundBible.com-1580329899.mp3")
-    //beep.play()
-
-    function checkForMessages(){
-        var bell = new Audio("https://www.tones7.com/media/sweet_text.mp3")
-        if(document.getElementById("system_message") == null) return
-        if(document.getElementById("system_message").getElementsByTagName("td").length > 0){
-            if(idleTime > 10){
-                if(bellCounter < 2){
-                    bell.play()
-                    bellCounter++
-                    if(!timeOutSet){
-                        setTimeout(resetBellCounter,10000)
-                        timeOutSet = true
-                    }
-                }
-            }
-        }
-        if(document.getElementById("attaksInfo") != null){
-            var e = document.getElementsByClassName("attaksInfo")[0]
-            e = document.getElementById("attaksInfo")
-            var clock = e.getElementsByClassName("popover")
-            if(clock == null) return
-            var clock_str = clock[0].innerText
-            var time = new Date("1970-01-01 " + clock_str);
-            if (time.getMinutes() < 4 && time.getHours() < 1 && idleTime > 5) startAlarm()
-        }
-    }
-    var alarm = new Audio("https://www.tones7.com/media/emergency_alarm.mp3");
-
-	var alarmPlaying = false
-    function startAlarm(){
-        if(!alarmPlaying){
-            alarm.play()
-            alarmPlaying = true
-            setTimeout(stopAlarm,3600)
-        }
-    }
-
-    function stopAlarm(){
-        alarm.pause();
-        alarm.currentTime = 0;
-        setTimeout(enableAlarm,10000)
-    }
-
-    function enableAlarm(){
-        alarmPlaying = false
-    }
-    function resetBellCounter(){
-        bellCounter = 0
-        timeOutSet = false
     }
 
     function neuerHandelClicked(){
@@ -261,7 +152,7 @@
         optionGroup_handel.label = "Handelsgebäude"
         var optionGroup_special = document.createElement('OPTGROUP')
         optionGroup_special.label = "Special Building"
-        
+
         for (var i= 0; i < 10; i++) {
             if(build[i]!=null){
                 var option = document.createElement("option");
@@ -269,7 +160,7 @@
                 option.text = build[i][STRING]
                 optionGroup_haupt.appendChild(option);
             }
-            
+
         }
         select.appendChild(optionGroup_haupt)
 
@@ -339,7 +230,7 @@
         }
         //select.appendChild(optionGroup_special)
         select.value = 1
-        
+
     }
 
     function generatePage(){
@@ -828,6 +719,200 @@
         build[INDEX_WER][LVL] = window.lvlWerkstatt
         build[INDEX_REC][LVL] = window.lvlRecyclingAnlage
     }
+
+
+
+    //   _____________________________
+    //  |                             |
+    //  |        Notification         |
+    //  |_____________________________|
+
+    var beep = new Audio ("https://soundbible.com//mp3/Fuzzy Beep-SoundBible.com-1580329899.mp3")
+    var bell = new Audio("https://www.tones7.com/media/sweet_text.mp3")
+    var bell2 = new Audio("https://www.tones7.com/media/sweet_text.mp3")
+    var alarm = new Audio("https://www.tones7.com/media/emergency_alarm.mp3");
+
+    var bellEnabled = false
+    var alarmEnabled = false
+    var updateEnabled = false
+
+    if (!nCheckInt) {
+            nCheckInt = setInterval(checkForMessages, 1000);
+        }
+
+    var idleTime = 0;
+    window.$(document).ready(function () {
+        var idleInterval = setInterval(timerIncrement, 1000); // 1 Sekunde
+        window.$(this).mousemove(function (e) {
+            idleTime = 0
+        });
+        window.$(this).keypress(function (e) {
+            idleTime = 0
+        });
+    });
+
+    function timerIncrement() {
+        idleTime = idleTime + 1;
+        if (idleTime > 170 + Math.floor(Math.random() * 20) ){ // about 3 minutes
+            if(updateEnabled)window.location.reload();
+        }
+    }
+
+    function checkForMessages(){
+        if(document.querySelector("#constructionPageDiv > table:nth-child(1) > tbody > tr:nth-child(3)") != null){
+            var freeEnergy = parseInt(window.Energy)
+            if (window.lvlKernkraftwerk <= 10 && window.lvlFusionskraftwerk < 1){
+                if(freeEnergy >= 5)document.querySelector("#constructionPageDiv > table:nth-child(1) > tbody > tr:nth-child(3)").style.backgroundColor = 'Green'
+                if(freeEnergy < 5)document.querySelector("#constructionPageDiv > table:nth-child(1) > tbody > tr:nth-child(3)").style.backgroundColor = 'DarkOrange'
+                if(freeEnergy < 2)document.querySelector("#constructionPageDiv > table:nth-child(1) > tbody > tr:nth-child(3)").style.backgroundColor = 'Red'
+            }
+            if(window.lvlFusionskraftwerk > 0){
+                if(freeEnergy >= 20)document.querySelector("#constructionPageDiv > table:nth-child(1) > tbody > tr:nth-child(3)").style.backgroundColor = 'Green'
+                if(freeEnergy < 20)document.querySelector("#constructionPageDiv > table:nth-child(1) > tbody > tr:nth-child(3)").style.backgroundColor = 'DarkOrange'
+                if(freeEnergy < 3)document.querySelector("#constructionPageDiv > table:nth-child(1) > tbody > tr:nth-child(3)").style.backgroundColor = 'Red'
+
+            }
+            var freeSlots = window.number_of_slots - window.number_of_buildings
+            if(freeSlots >= 5)document.querySelector("#constructionPageDiv > table:nth-child(1) > tbody > tr:nth-child(4)").style.backgroundColor = 'Green'
+            if(freeSlots < 5)document.querySelector("#constructionPageDiv > table:nth-child(1) > tbody > tr:nth-child(4)").style.backgroundColor = 'DarkOrange'
+            if(freeSlots < 2)document.querySelector("#constructionPageDiv > table:nth-child(1) > tbody > tr:nth-child(4)").style.backgroundColor = 'Red'
+        }
+
+
+        if(document.getElementById("system_message") == null) return
+        if(document.getElementById("system_message").getElementsByTagName("td").length > 0){
+            if(idleTime > 10 && bellEnabled){
+                bellEnabled = false
+                playBell()
+                setTimeout(playBell2,700)
+                setTimeout(bellEnable,8000)
+            }
+        }
+        if(document.getElementById("attaksInfo") != null){
+            var e = document.getElementsByClassName("attaksInfo")[0]
+            e = document.getElementById("attaksInfo")
+            var clock = e.getElementsByClassName("popover")
+            if(clock == null) return
+            var clock_str = clock[0].innerText
+            var time = new Date("1970-01-01 " + clock_str);
+            if (time.getMinutes() < 4 && time.getHours() < 1 && idleTime > 5) startAlarm()
+        }
+    }
+
+
+    function startAlarm(){
+        if(alarmEnabled){
+            alarm.play()
+            alarmEnabled = false
+            setTimeout(stopAlarm,3600)
+        }
+    }
+
+    function stopAlarm(){
+        alarm.pause();
+        alarm.currentTime = 0;
+        setTimeout(enableAlarm,10000)
+    }
+
+    function enableAlarm(){
+        alarmEnabled = true
+    }
+    function bellEnable(){
+        bellEnabled = true
+    }
+
+    function playBell(){
+        bell.play()
+    }
+    function playBell2(){
+        bell2.play()
+    }
+
+
+
+
+
+    //   _____________________________
+    //  |                             |
+    //  |       Error Blocker         |
+    //  |_____________________________|
+
+
+    var script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.src = '//cdn.jsdelivr.net/npm/sweetalert2@11';
+
+    document.head.appendChild(script);
+
+    addJS_Node (null, null, overrideSelectNativeJS_Functions);
+
+    function overrideSelectNativeJS_Functions () {
+        window.alert = function alert (message) {
+            if(message.includes("error"))return
+            window.Swal.fire({
+                text: message,
+                color: '#62C4CC',
+                background: '#01141D',
+                confirmButtonColor: '#173D47'
+            })
+            console.log(message)
+        }
+    }
+
+    function addJS_Node (text, s_URL, funcToRun) {
+        var D = document;
+        var scriptNode = D.createElement ('script');
+        scriptNode.type = "text/javascript";
+        if (text) scriptNode.textContent = text;
+        if (s_URL) scriptNode.src = s_URL;
+        if (funcToRun) scriptNode.textContent = '(' + funcToRun.toString() + ')()';
+
+        var targ = D.getElementsByTagName ('head')[0] || D.body || D.documentElement;
+        targ.appendChild (scriptNode);
+    }
+
+    //   ________________________________
+    //  |                                |
+    //  |  Energy & Buldingslot Display  |
+    //  |________________________________|
+
+
+    function optimizeFirstPage(){
+        document.querySelector("#ubersicht")
+        try{
+            setTimeout(function e(){
+                document.querySelector("#uberPageDiv > table:nth-child(6) > tbody > tr:nth-child(5)").remove()
+                document.querySelector("#uberPageDiv > table:nth-child(6) > tbody > tr:nth-child(5)").remove()
+                var freeEnergy = parseInt(window.Energy)
+                if (window.lvlKernkraftwerk <= 10 && window.lvlFusionskraftwerk < 1){
+                    if(freeEnergy >= 5)document.querySelector("#uberPageDiv > table:nth-child(6) > tbody > tr:nth-child(3)").backgroundColor = 'Green'
+                    if(freeEnergy < 5)document.querySelector("#uberPageDiv > table:nth-child(6) > tbody > tr:nth-child(3)").style.backgroundColor = 'DarkOrange'
+                    if(freeEnergy < 2)document.querySelector("#uberPageDiv > table:nth-child(6) > tbody > tr:nth-child(3)").style.backgroundColor = 'Red'
+                }
+                if(window.lvlFusionskraftwerk > 0){
+                    if(freeEnergy >= 20)document.querySelector("#uberPageDiv > table:nth-child(6) > tbody > tr:nth-child(3)").style.backgroundColor = 'Green'
+                    if(freeEnergy < 20)document.querySelector("#uberPageDiv > table:nth-child(6) > tbody > tr:nth-child(3)").style.backgroundColor = 'DarkOrange'
+                    if(freeEnergy < 3)document.querySelector("#uberPageDiv > table:nth-child(6) > tbody > tr:nth-child(3)").style.backgroundColor = 'Red'
+
+                }
+                var freeSlots = window.number_of_slots - window.number_of_buildings
+                if(freeSlots >= 5)document.querySelector("#uberPageDiv > table:nth-child(6) > tbody > tr:nth-child(4)").style.backgroundColor = 'Green'
+                if(freeSlots < 5)document.querySelector("#uberPageDiv > table:nth-child(6) > tbody > tr:nth-child(4)").style.backgroundColor = 'DarkOrange'
+                if(freeSlots < 2)document.querySelector("#uberPageDiv > table:nth-child(6) > tbody > tr:nth-child(4)").style.backgroundColor = 'Red'
+            },1000)
+        }
+        catch(e){
+            console.log("fdsafds")
+        }
+    }
+    optimizeFirstPage()
+    document.querySelector("#ubersicht").addEventListener("click", optimizeFirstPage)
+
+    //   ________________________________
+    //  |                                |
+    //  |           Database             |
+    //  |________________________________|
+
 
     var build = new Array()
     const LW_ID = 0
