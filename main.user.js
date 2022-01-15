@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         LastWar Utilities
 // @namespace    http://tampermonkey.net/
-// @version      1.2.4
+// @version      1.3.0
 // @description  Tool for LastWar
 // @author       Revan
 // @match        http*://*.last-war.de/main.php*
@@ -9,7 +9,8 @@
 // @grant        none
 // @downloadURL  https://github.com/BenniBaerenstark/LastWar-Utility/raw/main/main.user.js
 // @updateURL    https://github.com/BenniBaerenstark/LastWar-Utility/raw/main/main.user.js
-// @run-at      document-idle
+// @require      //cdn.jsdelivr.net/npm/sweetalert2@11
+// @run-at       document-idle
 // ==/UserScript==
 
 (function() {
@@ -90,6 +91,40 @@
     var input_lvl
 
     let nIntervId
+    let nCheckInt
+
+    var script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.src = '//cdn.jsdelivr.net/npm/sweetalert2@11';
+
+    document.head.appendChild(script);
+
+    addJS_Node (null, null, overrideSelectNativeJS_Functions);
+
+    function overrideSelectNativeJS_Functions () {
+        window.alert = function alert (message) {
+            if(message.includes("error"))return
+            window.Swal.fire({
+                text: message,
+                color: '#62C4CC',
+                background: '#01141D',
+                confirmButtonColor: '#173D47'
+            })
+            console.log(message)
+        }
+    }
+
+    function addJS_Node (text, s_URL, funcToRun) {
+        var D = document;
+        var scriptNode = D.createElement ('script');
+        scriptNode.type = "text/javascript";
+        if (text) scriptNode.textContent = text;
+        if (s_URL) scriptNode.src = s_URL;
+        if (funcToRun) scriptNode.textContent = '(' + funcToRun.toString() + ')()';
+
+        var targ = D.getElementsByTagName ('head')[0] || D.body || D.documentElement;
+        targ.appendChild (scriptNode);
+    }
 
     window.onclick = e => {
         if(e.target.innerText == "Neues Handelsangebot stellen"){
@@ -98,6 +133,88 @@
         if(e.target.className == "fas fa-handshake"){
             neuerHandelClicked()
         }
+    }
+    //setTimeout(checkForMessages,3000)
+    if (!nCheckInt) {
+            //nCheckInt = setInterval(checkForMessages, 1000);
+        }
+
+
+    var idleTime = 0;
+    window.$(document).ready(function () {
+        // Increment the idle time counter every minute.
+        var idleInterval = setInterval(timerIncrement, 1000); // 1 Sekunde
+
+        // Zero the idle timer on mouse movement.
+        window.$(this).mousemove(function (e) {
+            idleTime = 0
+        });
+        window.$(this).keypress(function (e) {
+            idleTime = 0
+        });
+    });
+
+    function timerIncrement() {
+        idleTime = idleTime + 1;
+        if (idleTime > 170 + Math.floor(Math.random() * 20) ){ // about 3 minutes
+            //window.location.reload();
+        }
+    }
+
+    var bellCounter = 0
+    var timeOutSet = false
+
+    var beep = new Audio ("https://soundbible.com//mp3/Fuzzy Beep-SoundBible.com-1580329899.mp3")
+    //beep.play()
+
+    function checkForMessages(){
+        var bell = new Audio("https://www.tones7.com/media/sweet_text.mp3")
+        if(document.getElementById("system_message") == null) return
+        if(document.getElementById("system_message").getElementsByTagName("td").length > 0){
+            if(idleTime > 10){
+                if(bellCounter < 2){
+                    bell.play()
+                    bellCounter++
+                    if(!timeOutSet){
+                        setTimeout(resetBellCounter,10000)
+                        timeOutSet = true
+                    }
+                }
+            }
+        }
+        if(document.getElementById("attaksInfo") != null){
+            var e = document.getElementsByClassName("attaksInfo")[0]
+            e = document.getElementById("attaksInfo")
+            var clock = e.getElementsByClassName("popover")
+            if(clock == null) return
+            var clock_str = clock[0].innerText
+            var time = new Date("1970-01-01 " + clock_str);
+            if (time.getMinutes() < 4 && time.getHours() < 1 && idleTime > 5) startAlarm()
+        }
+    }
+    var alarm = new Audio("https://www.tones7.com/media/emergency_alarm.mp3");
+
+	var alarmPlaying = false
+    function startAlarm(){
+        if(!alarmPlaying){
+            alarm.play()
+            alarmPlaying = true
+            setTimeout(stopAlarm,3600)
+        }
+    }
+
+    function stopAlarm(){
+        alarm.pause();
+        alarm.currentTime = 0;
+        setTimeout(enableAlarm,10000)
+    }
+
+    function enableAlarm(){
+        alarmPlaying = false
+    }
+    function resetBellCounter(){
+        bellCounter = 0
+        timeOutSet = false
     }
 
     function neuerHandelClicked(){
