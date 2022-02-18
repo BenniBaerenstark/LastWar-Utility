@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         LastWar Utilities
 // @namespace    http://tampermonkey.net/
-// @version      1.4.0
+// @version      1.5.0
 // @description  Tool for LastWar
 // @author       Revan
 // @match        http*://*.last-war.de/main.php*
@@ -1294,43 +1294,58 @@
 
     function ress_HP(lvl){
         var res = new Array()
-        res[RES_FE] = 0
-        res[RES_KR] = 0
+        res[RES_FE] = Math.round(7200*(1+parseInt(lvl)*0.8))
+        res[RES_KR] = Math.round(1000*(1+parseInt(lvl)*0.8))
         res[RES_FR] = 0
         res[RES_OR] = 0
-        res[RES_FU] = 0
+        res[RES_FU] = Math.round(5400*(1+parseInt(lvl)*0.8))
         res[RES_AU] = 0
         return res
     }
 
     function ress_HZ(lvl){
         var res = new Array()
-        res[RES_FE] = 0
-        res[RES_KR] = 0
+        res[RES_FE] = Math.round(6000*Math.pow(2,parseInt(lvl)/2))
+        res[RES_KR] = Math.round(2250*Math.pow(2,parseInt(lvl)/2))
         res[RES_FR] = 0
         res[RES_OR] = 0
-        res[RES_FU] = 0
+        res[RES_FU] = Math.round(3250*Math.pow(2,parseInt(lvl)/2))
         res[RES_AU] = 0
         return res
     }
 
     function ress_BA(lvl){
         var res = new Array()
-        res[RES_FE] = 0
-        res[RES_KR] = 0
+        if(lvl == 0){
+            res[RES_FE] = 4500
+            res[RES_KR] = 2000
+            res[RES_FU] = 3500
+        }
+        else{
+            res[RES_FE] = Math.round(12656.25*Math.pow((parseInt(lvl) + 1), 2) + 4500)
+            res[RES_KR] = Math.round(2500*Math.pow((parseInt(lvl) + 1), 2) + 2000)
+            res[RES_FU] = Math.round(7656.25*Math.pow((parseInt(lvl) + 1), 2) + 3500)
+        }
         res[RES_FR] = 0
         res[RES_OR] = 0
-        res[RES_FU] = 0
         res[RES_AU] = 0
         return res
     }
 
     function ress_GDZ(lvl){
         var res = new Array()
-        res[RES_FE] = 0
-        res[RES_KR] = 0
-        res[RES_FR] = 0
-        res[RES_OR] = 0
+        if(lvl == 0){
+            res[RES_FE] = 8000
+            res[RES_KR] = 4000
+            res[RES_FR] = 12000
+            res[RES_OR] = 4000
+        }
+        else{
+            res[RES_FE] = parseInt(lvl) + 1)*6400+8000
+            res[RES_KR] = parseInt(lvl) + 1)*3200+4000
+            res[RES_FR] = parseInt(lvl) + 1)*9600+12000
+            res[RES_OR] = parseInt(lvl) + 1)*3200+4000
+        }
         res[RES_FU] = 0
         res[RES_AU] = 0
         return res
@@ -1338,10 +1353,17 @@
 
     function ress_KRE(lvl){
         var res = new Array()
-        res[RES_FE] = 0
-        res[RES_KR] = 0
+        if(lvl == 0){
+            res[RES_FE] = 30000
+            res[RES_KR] = 25000
+            res[RES_OR] = 7000
+        }
+        else{
+            res[RES_FE] = parseInt(lvl) + 1)*24000+30000
+            res[RES_KR] = parseInt(lvl) + 1)*20000+25000
+            res[RES_OR] = parseInt(lvl) + 1)*5600+7000
+        }
         res[RES_FR] = 0
-        res[RES_OR] = 0
         res[RES_FU] = 0
         res[RES_AU] = 0
         return res
