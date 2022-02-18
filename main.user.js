@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         LastWar Utilities
 // @namespace    http://tampermonkey.net/
-// @version      1.5.0
+// @version      1.5.1
 // @description  Tool for LastWar
 // @author       Revan
 // @match        http*://*.last-war.de/main.php*
@@ -217,7 +217,7 @@
             }
 
         }
-        //select.appendChild(optionGroup_handel)
+        select.appendChild(optionGroup_handel)
 
         for ( i= 60; i < 70; i++) {
             if(build[i]!=null){
@@ -228,7 +228,7 @@
             }
 
         }
-        //select.appendChild(optionGroup_special)
+        select.appendChild(optionGroup_special)
         select.value = 1
 
     }
@@ -1341,10 +1341,10 @@
             res[RES_OR] = 4000
         }
         else{
-            res[RES_FE] = parseInt(lvl) + 1)*6400+8000
-            res[RES_KR] = parseInt(lvl) + 1)*3200+4000
-            res[RES_FR] = parseInt(lvl) + 1)*9600+12000
-            res[RES_OR] = parseInt(lvl) + 1)*3200+4000
+            res[RES_FE] = (parseInt(lvl) + 1)*6400+8000
+            res[RES_KR] = (parseInt(lvl) + 1)*3200+4000
+            res[RES_FR] = (parseInt(lvl) + 1)*9600+12000
+            res[RES_OR] = (parseInt(lvl) + 1)*3200+4000
         }
         res[RES_FU] = 0
         res[RES_AU] = 0
@@ -1359,9 +1359,9 @@
             res[RES_OR] = 7000
         }
         else{
-            res[RES_FE] = parseInt(lvl) + 1)*24000+30000
-            res[RES_KR] = parseInt(lvl) + 1)*20000+25000
-            res[RES_OR] = parseInt(lvl) + 1)*5600+7000
+            res[RES_FE] = (parseInt(lvl) + 1)*24000+30000
+            res[RES_KR] = (parseInt(lvl) + 1)*20000+25000
+            res[RES_OR] = (parseInt(lvl) + 1)*5600+7000
         }
         res[RES_FR] = 0
         res[RES_FU] = 0
@@ -1371,22 +1371,36 @@
 
     function ress_WER(lvl){
         var res = new Array()
-        res[RES_FE] = 0
-        res[RES_KR] = 0
+        if(lvl == 0){
+            res[RES_FE] = 12000
+            res[RES_KR] = 4000
+            res[RES_FU] = 5000
+        }
+        else{
+            res[RES_FE] = (parseInt(lvl) + 1)*9600+12000
+            res[RES_KR] = (parseInt(lvl) + 1)*3200+4000
+            res[RES_FU] = (parseInt(lvl) + 1)*4000+5000
+        }
         res[RES_FR] = 0
         res[RES_OR] = 0
-        res[RES_FU] = 0
         res[RES_AU] = 0
         return res
     }
 
     function ress_REC(lvl){
         var res = new Array()
-        res[RES_FE] = 0
-        res[RES_KR] = 0
+        if(lvl == 0){
+            res[RES_FE] = 8000
+            res[RES_KR] = 2500
+            res[RES_FU] = 4000
+        }
+        else{
+            res[RES_FE] = (parseInt(lvl) + 1)*6400+8000
+            res[RES_KR] = (parseInt(lvl) + 1)*2000+2500
+            res[RES_FU] = (parseInt(lvl) + 1)*3200+4000
+        }
         res[RES_FR] = 0
         res[RES_OR] = 0
-        res[RES_FU] = 0
         res[RES_AU] = 0
         return res
     }
