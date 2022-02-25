@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         LastWar Utilities
 // @namespace    http://tampermonkey.net/
-// @version      1.6.0
+// @version      1.6.1
 // @description  Tool for LastWar
 // @author       Revan
 // @match        http*://*.last-war.de/main.php*
@@ -951,7 +951,7 @@
 
     //   ________________________________
     //  |                                |
-    //  |  Energy & Buldingslot Display  |
+    //  |         Visual Changes         |
     //  |________________________________|
 
 
@@ -985,6 +985,15 @@
     }
     optimizeFirstPage()
     document.querySelector("#ubersicht").addEventListener("click", optimizeFirstPage)
+    
+    function optimizeHighscore(){
+        setTimeout(function e(){
+            var playersPlace = parseInt(document.querySelector("#scoreTable > tbody > tr:nth-child(2) > td:nth-child(1)").innerText)
+            document.querySelector("#scoreTable > tbody > tr:nth-child("+(playersPlace+4)+")").style.backgroundColor = "#4E9B97"
+        },500)
+    }
+
+    document.querySelector("#highscore_player").addEventListener("click", optimizeHighscore)
 
     //   ________________________________
     //  |                                |
