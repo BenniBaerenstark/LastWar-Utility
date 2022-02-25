@@ -193,7 +193,7 @@
         document.getElementById("my_frurozin").value = quantity * ships[ship].fz
         document.getElementById("my_gold").value = quantity * ships[ship].au
         if (parseInt(quantity) >= 1){
-            document.getElementById("tradeOfferComment").value = quantity + " x " + ships[ship][name]
+            document.getElementById("tradeOfferComment").value = quantity + " x " + ships[ship].name
             document.getElementById("his_eisen").value = 1
         }
         else{
