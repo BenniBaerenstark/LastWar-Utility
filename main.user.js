@@ -1,20 +1,207 @@
 // ==UserScript==
 // @name         LastWar Utilities
 // @namespace    http://tampermonkey.net/
-// @version      1.5.1
+// @version      1.6.0
 // @description  Tool for LastWar
 // @author       Revan
 // @match        http*://*.last-war.de/main.php*
 // @match        http*://*.last-war.de/main-mobile.php*
 // @grant        none
-// @downloadURL  https://github.com/BenniBaerenstark/LastWar-Utility/raw/main/main.user.js
-// @updateURL    https://github.com/BenniBaerenstark/LastWar-Utility/raw/main/main.user.js
 // @require      //cdn.jsdelivr.net/npm/sweetalert2@11
-// @run-at       document-idle
 // ==/UserScript==
 
 (function() {
     'use strict';
+
+    //   _____________________________
+    //  |                             |
+    //  |         Ship Market         |
+    //  |_____________________________|
+
+
+    var ships;
+    var symbol_true
+    var symbol_false
+
+    window.$.getJSON("https://raw.githubusercontent.com/BenniBaerenstark/-DG-Ship-Market/main/shipsValues.json")
+    .done(function( data ) {
+       ships = data.ships
+       symbol_true = data.symbol_true
+       symbol_false = data.symbol_false
+    });
+
+    var input_ship
+    var select_ship
+    var table_ship
+
+    function generateShipMarket(){
+        input_ship = document.createElement("INPUT");
+        input_ship.setAttribute("style", "width: 50px;");
+        input_ship.type = "number"
+        input_ship.value = 1
+
+        var max = document.createElement("span");
+        max.setAttribute("style", "cursor: pointer");
+        max.innerHTML = "Max"
+        max.addEventListener("click", maxShip, false);
+
+        var btn = document.createElement("a");
+        btn.classList.add("formButtonNewMessage")
+        btn.innerHTML = "Set"
+        btn.setAttribute("style", "float: none");
+        btn.addEventListener("click", setTrade_Ship, false);
+
+        var values = getShipNames();
+        select_ship = document.createElement("select");
+        select_ship.name = "shipSelect";
+        select_ship.id = "shipSelect"
+        for (const val of values) {
+            var option = document.createElement("option");
+            option.value = val;
+            option.text = val.charAt(0).toUpperCase() + val.slice(1);
+            select_ship.appendChild(option);
+        }
+        select_ship.addEventListener ("change", function () {
+            updateTable()
+        })
+
+        var div = document.createElement("div");
+        div.id = "container"
+
+        var parent_length = document.getElementsByClassName("formButtonNewMessage").length
+        var parent = document.getElementsByClassName("formButtonNewMessage")[parent_length-1].parentElement
+        parent.appendChild(div)
+        div.appendChild(max)
+        div.appendChild(input_ship)
+        div.appendChild(select_ship)
+        div.appendChild(btn)
+        table_ship = infoTable()
+        parent.appendChild(table_ship)
+        updateTable()
+
+    }
+
+    function infoTable(){
+        //var shipNr = select.selectedIndex
+        var table = document.createElement("table")
+
+        var firstRow = document.createElement("tr")
+        var name_Titel = document.createElement("th")
+        name_Titel.innerText = " "
+        firstRow.appendChild(name_Titel)
+        var sClass = document.createElement("th")
+        sClass.innerText = "Klasse"
+        firstRow.appendChild(sClass)
+        var attDef = document.createElement("th")
+        attDef.innerText = "Att / Def"
+        firstRow.appendChild(attDef)
+        var drive_Titel = document.createElement("th")
+        drive_Titel.innerText = "Antrieb"
+        firstRow.appendChild(drive_Titel)
+        var freight_Titel = document.createElement("th")
+        freight_Titel.innerText = "Fracht"
+        firstRow.appendChild(freight_Titel)
+        var lKom_Titel = document.createElement("th")
+        lKom_Titel.innerText = "L-Kom"
+        firstRow.appendChild(lKom_Titel)
+        var tt_Titel = document.createElement("th")
+        tt_Titel.innerText = "TT"
+        firstRow.appendChild(tt_Titel)
+        table.appendChild(firstRow)
+
+        var secondRow = document.createElement("tr")
+        var name_String = document.createElement("th")
+        name_String.id = "name_String"
+        secondRow.appendChild(name_String)
+        var sClass_String = document.createElement("td")
+        sClass_String.id = "sClass_String"
+        secondRow.appendChild(sClass_String)
+        var attDef_Value = document.createElement("td")
+        attDef_Value.id = "attDef_Value"
+        secondRow.appendChild(attDef_Value)
+        var drive_Value = document.createElement("td")
+        drive_Value.id = "drive_Value"
+        secondRow.appendChild(drive_Value)
+        var freight_Value = document.createElement("td")
+        freight_Value.id = "freight_Value"
+        secondRow.appendChild(freight_Value)
+        var lKom_Value = document.createElement("td")
+        lKom_Value.id = "lKom_Value"
+        secondRow.appendChild(lKom_Value)
+        var tt_Value = document.createElement("td")
+        tt_Value.id = "tt_Value"
+        secondRow.appendChild(tt_Value)
+
+        table.appendChild(secondRow)
+
+        return table
+    }
+
+    function updateTable(){
+        var shipNr = select_ship.selectedIndex
+        var temp
+
+        document.getElementById("name_String").innerText = ships[shipNr].name
+        document.getElementById("sClass_String").innerText = ships[shipNr].shipClass
+        document.getElementById("attDef_Value").innerText = ships[shipNr].att + " / " + ships[shipNr].def
+        document.getElementById("drive_Value").innerText = ships[shipNr].drive + " " + ships[shipNr].drive_s + "%"
+        document.getElementById("freight_Value").innerText = ships[shipNr].freight
+        if(ships[shipNr].lkom) temp = symbol_true
+        else temp = symbol_false
+        document.getElementById("lKom_Value").innerText = temp
+        if(ships[shipNr].tt) temp = symbol_true
+        else temp = symbol_false
+        document.getElementById("tt_Value").innerText = temp
+
+    }
+
+    function maxShip(){
+        var percentTrade = 1+(window.lose/100)
+        var shipNr = select_ship.selectedIndex
+        var max = Math.floor(window.Roheisen/(ships[shipNr].fe*percentTrade))
+        var maxKr = Math.floor(window.Kristall/(ships[shipNr].kr*percentTrade))
+        if(maxKr < max) max = maxKr
+        var maxFb = Math.floor(window.Frubin/(ships[shipNr].fr*percentTrade))
+        if(maxFb < max) max = maxFb
+        var maxOr = Math.floor(window.Orizin/(ships[shipNr].or*percentTrade))
+        if(maxOr < max) max = maxOr
+        var maxFz = Math.floor(window.Frurozin/(ships[shipNr].fz*percentTrade))
+        if(maxFz < max) max = maxFz
+        var maxGo = Math.floor(window.Gold/(ships[shipNr].au*percentTrade))
+        if(maxGo < max) max = maxGo
+        input_ship.value = max
+
+    }
+
+    function getShipNames(){
+        var names = new Array();
+        for (var i = 0; i < ships.length; i++) {
+            names[i] = ships[i].name
+        }
+        return names
+    }
+
+
+    function setTrade_Ship(){
+        console.log(select_ship.selectedIndex)
+        var ship = select_ship.selectedIndex
+        var quantity = input_ship.value
+        document.getElementById("my_eisen").value = quantity * ships[ship].fe
+        document.getElementById("my_kristall").value = quantity * ships[ship].kr
+        document.getElementById("my_frubin").value = quantity * ships[ship].fr
+        document.getElementById("my_orizin").value = quantity * ships[ship].or
+        document.getElementById("my_frurozin").value = quantity * ships[ship].fz
+        document.getElementById("my_gold").value = quantity * ships[ship].au
+        if (parseInt(quantity) >= 1){
+            document.getElementById("tradeOfferComment").value = quantity + " x " + ships[ship][name]
+            document.getElementById("his_eisen").value = 1
+        }
+        else{
+            document.getElementById("tradeOfferComment").value = ""
+            document.getElementById("his_eisen").value = 0
+        }
+    }
+
 
 
     //   _____________________________
@@ -123,6 +310,7 @@
         }
         clearInterval(nIntervId);
         nIntervId = null;
+        generateShipMarket()
         generatePage()
         return true
     }
@@ -724,116 +912,6 @@
 
     //   _____________________________
     //  |                             |
-    //  |        Notification         |
-    //  |_____________________________|
-
-    var beep = new Audio ("https://soundbible.com//mp3/Fuzzy Beep-SoundBible.com-1580329899.mp3")
-    var bell = new Audio("https://www.tones7.com/media/sweet_text.mp3")
-    var bell2 = new Audio("https://www.tones7.com/media/sweet_text.mp3")
-    var alarm = new Audio("https://www.tones7.com/media/emergency_alarm.mp3");
-
-    var bellEnabled = false
-    var alarmEnabled = false
-    var updateEnabled = false
-
-    if (!nCheckInt) {
-            nCheckInt = setInterval(checkForMessages, 1000);
-        }
-
-    var idleTime = 0;
-    window.$(document).ready(function () {
-        var idleInterval = setInterval(timerIncrement, 1000); // 1 Sekunde
-        window.$(this).mousemove(function (e) {
-            idleTime = 0
-        });
-        window.$(this).keypress(function (e) {
-            idleTime = 0
-        });
-    });
-
-    function timerIncrement() {
-        idleTime = idleTime + 1;
-        if (idleTime > 170 + Math.floor(Math.random() * 20) ){ // about 3 minutes
-            if(updateEnabled)window.location.reload();
-        }
-    }
-
-    function checkForMessages(){
-        if(document.querySelector("#constructionPageDiv > table:nth-child(1) > tbody > tr:nth-child(3)") != null){
-            var freeEnergy = parseInt(window.Energy)
-            if (window.lvlKernkraftwerk <= 10 && window.lvlFusionskraftwerk < 1){
-                if(freeEnergy >= 5)document.querySelector("#constructionPageDiv > table:nth-child(1) > tbody > tr:nth-child(3)").style.backgroundColor = 'Green'
-                if(freeEnergy < 5)document.querySelector("#constructionPageDiv > table:nth-child(1) > tbody > tr:nth-child(3)").style.backgroundColor = 'DarkOrange'
-                if(freeEnergy < 2)document.querySelector("#constructionPageDiv > table:nth-child(1) > tbody > tr:nth-child(3)").style.backgroundColor = 'Red'
-            }
-            if(window.lvlFusionskraftwerk > 0){
-                if(freeEnergy >= 20)document.querySelector("#constructionPageDiv > table:nth-child(1) > tbody > tr:nth-child(3)").style.backgroundColor = 'Green'
-                if(freeEnergy < 20)document.querySelector("#constructionPageDiv > table:nth-child(1) > tbody > tr:nth-child(3)").style.backgroundColor = 'DarkOrange'
-                if(freeEnergy < 3)document.querySelector("#constructionPageDiv > table:nth-child(1) > tbody > tr:nth-child(3)").style.backgroundColor = 'Red'
-
-            }
-            var freeSlots = window.number_of_slots - window.number_of_buildings
-            if(freeSlots >= 5)document.querySelector("#constructionPageDiv > table:nth-child(1) > tbody > tr:nth-child(4)").style.backgroundColor = 'Green'
-            if(freeSlots < 5)document.querySelector("#constructionPageDiv > table:nth-child(1) > tbody > tr:nth-child(4)").style.backgroundColor = 'DarkOrange'
-            if(freeSlots < 2)document.querySelector("#constructionPageDiv > table:nth-child(1) > tbody > tr:nth-child(4)").style.backgroundColor = 'Red'
-        }
-
-
-        if(document.getElementById("system_message") == null) return
-        if(document.getElementById("system_message").getElementsByTagName("td").length > 0){
-            if(idleTime > 10 && bellEnabled){
-                bellEnabled = false
-                playBell()
-                setTimeout(playBell2,700)
-                setTimeout(bellEnable,8000)
-            }
-        }
-        if(document.getElementById("attaksInfo") != null){
-            var e = document.getElementsByClassName("attaksInfo")[0]
-            e = document.getElementById("attaksInfo")
-            var clock = e.getElementsByClassName("popover")
-            if(clock == null) return
-            var clock_str = clock[0].innerText
-            var time = new Date("1970-01-01 " + clock_str);
-            if (time.getMinutes() < 4 && time.getHours() < 1 && idleTime > 5) startAlarm()
-        }
-    }
-
-
-    function startAlarm(){
-        if(alarmEnabled){
-            alarm.play()
-            alarmEnabled = false
-            setTimeout(stopAlarm,3600)
-        }
-    }
-
-    function stopAlarm(){
-        alarm.pause();
-        alarm.currentTime = 0;
-        setTimeout(enableAlarm,10000)
-    }
-
-    function enableAlarm(){
-        alarmEnabled = true
-    }
-    function bellEnable(){
-        bellEnabled = true
-    }
-
-    function playBell(){
-        bell.play()
-    }
-    function playBell2(){
-        bell2.play()
-    }
-
-
-
-
-
-    //   _____________________________
-    //  |                             |
     //  |       Error Blocker         |
     //  |_____________________________|
 
@@ -881,24 +959,24 @@
         document.querySelector("#ubersicht")
         try{
             setTimeout(function e(){
-                document.querySelector("#uberPageDiv > table:nth-child(6) > tbody > tr:nth-child(5)").remove()
-                document.querySelector("#uberPageDiv > table:nth-child(6) > tbody > tr:nth-child(5)").remove()
+                document.querySelector("#uberPageDiv > table:nth-child(" + (window.all_my_planets.length+1) + ") > tbody > tr:nth-child(5)").remove()
+                document.querySelector("#uberPageDiv > table:nth-child(" + (window.all_my_planets.length+1) + ") > tbody > tr:nth-child(5)").remove()
                 var freeEnergy = parseInt(window.Energy)
                 if (window.lvlKernkraftwerk <= 10 && window.lvlFusionskraftwerk < 1){
-                    if(freeEnergy >= 5)document.querySelector("#uberPageDiv > table:nth-child(6) > tbody > tr:nth-child(3)").backgroundColor = 'Green'
-                    if(freeEnergy < 5)document.querySelector("#uberPageDiv > table:nth-child(6) > tbody > tr:nth-child(3)").style.backgroundColor = 'DarkOrange'
-                    if(freeEnergy < 2)document.querySelector("#uberPageDiv > table:nth-child(6) > tbody > tr:nth-child(3)").style.backgroundColor = 'Red'
+                    if(freeEnergy >= 5)document.querySelector("#uberPageDiv > table:nth-child(" + (window.all_my_planets.length+1) + ") > tbody > tr:nth-child(3)").backgroundColor = 'Green'
+                    if(freeEnergy < 5)document.querySelector("#uberPageDiv > table:nth-child(" + (window.all_my_planets.length+1) + ") > tbody > tr:nth-child(3)").style.backgroundColor = 'DarkOrange'
+                    if(freeEnergy < 2)document.querySelector("#uberPageDiv > table:nth-child(" + (window.all_my_planets.length+1) + ") > tbody > tr:nth-child(3)").style.backgroundColor = 'Red'
                 }
                 if(window.lvlFusionskraftwerk > 0){
-                    if(freeEnergy >= 20)document.querySelector("#uberPageDiv > table:nth-child(6) > tbody > tr:nth-child(3)").style.backgroundColor = 'Green'
-                    if(freeEnergy < 20)document.querySelector("#uberPageDiv > table:nth-child(6) > tbody > tr:nth-child(3)").style.backgroundColor = 'DarkOrange'
-                    if(freeEnergy < 3)document.querySelector("#uberPageDiv > table:nth-child(6) > tbody > tr:nth-child(3)").style.backgroundColor = 'Red'
+                    if(freeEnergy >= 20)document.querySelector("#uberPageDiv > table:nth-child(" + (window.all_my_planets.length+1) + ") > tbody > tr:nth-child(3)").style.backgroundColor = 'Green'
+                    if(freeEnergy < 20)document.querySelector("#uberPageDiv > table:nth-child(" + (window.all_my_planets.length+1) + ") > tbody > tr:nth-child(3)").style.backgroundColor = 'DarkOrange'
+                    if(freeEnergy < 3)document.querySelector("#uberPageDiv > table:nth-child(" + (window.all_my_planets.length+1) + ") > tbody > tr:nth-child(3)").style.backgroundColor = 'Red'
 
                 }
                 var freeSlots = window.number_of_slots - window.number_of_buildings
-                if(freeSlots >= 5)document.querySelector("#uberPageDiv > table:nth-child(6) > tbody > tr:nth-child(4)").style.backgroundColor = 'Green'
-                if(freeSlots < 5)document.querySelector("#uberPageDiv > table:nth-child(6) > tbody > tr:nth-child(4)").style.backgroundColor = 'DarkOrange'
-                if(freeSlots < 2)document.querySelector("#uberPageDiv > table:nth-child(6) > tbody > tr:nth-child(4)").style.backgroundColor = 'Red'
+                if(freeSlots >= 5)document.querySelector("#uberPageDiv > table:nth-child(" + (window.all_my_planets.length+1) + ") > tbody > tr:nth-child(4)").style.backgroundColor = 'Green'
+                if(freeSlots < 5)document.querySelector("#uberPageDiv > table:nth-child(" + (window.all_my_planets.length+1) + ") > tbody > tr:nth-child(4)").style.backgroundColor = 'DarkOrange'
+                if(freeSlots < 2)document.querySelector("#uberPageDiv > table:nth-child(" + (window.all_my_planets.length+1) + ") > tbody > tr:nth-child(4)").style.backgroundColor = 'Red'
             },1000)
         }
         catch(e){
